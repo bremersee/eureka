@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--+
+    | Log4j2 configuration file.
+    +-->
+<configuration status="OFF" monitorInterval="30">
+    <appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <!--+
+                | %class is the real class, %logger is the logger name
+                +-->
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level %class (%logger):%line [%method]%n%msg%n" />
+        </Console>
+        <RollingFile name="RollingFile" 
+                     fileName="${log-dir}/${app-name}.log"
+                     filePattern="${log-dir}/$${date:yyyy-MM}/@app-name@-%d{dd-MM-yyyy}-%i.log.gz">
+            <PatternLayout>
+                <Pattern>%d{HH:mm:ss.SSS} %-5level %class (%logger):%line [%method] (%t)%n%msg%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <OnStartupTriggeringPolicy />
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="8MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="20"/>
+        </RollingFile>
+    </appenders>
+    <Loggers>
+        <Logger name="org.bremersee" level="debug" additivity="false">
+            <AppenderRef ref="RollingFile" />
+        </Logger>
+        <Logger name="org.springframework" level="warn" additivity="false">
+            <AppenderRef ref="RollingFile" />
+        </Logger>
+        <Logger name="org.springframework.web" level="debug" additivity="false">
+            <AppenderRef ref="RollingFile" />
+        </Logger>
+        <Logger name="org.springframework.security" level="info" additivity="false">
+            <AppenderRef ref="RollingFile" />
+        </Logger>
+        <!-- Hibernate logging options (INFO only shows startup messages) -->
+        <!--
+        <Logger name="org.hibernate" level="info" additivity="false">
+            <AppenderRef ref="RollingFile" />
+        </Logger>
+        -->
+        <!-- If show_sql is not displayed -->
+        <!--
+        <Logger name="org.hibernate.SQL" level="debug" additivity="false">
+            <AppenderRef ref="RollingFile" />
+        </Logger>
+        -->
+        <!-- Log JDBC bind parameter runtime arguments -->
+        <!--
+        <Logger name="org.hibernate.type" level="trace" additivity="false">
+            <AppenderRef ref="RollingFile" />
+        </Logger>
+        -->
+        <Root level="info">
+            <AppenderRef ref="RollingFile" />
+        </Root>
+    </Loggers>
+</configuration>
