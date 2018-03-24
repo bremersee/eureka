@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: eureka
+  profiles:
+    active: base
+  cloud:
+    config:
+      uri: https://example.org
+      username: changeme
+      password: changeit
