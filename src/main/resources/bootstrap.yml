@@ -1,10 +1,11 @@
 spring:
   application:
-    name: eureka
+    name: ${APPLICATION_NAME:eureka}
   profiles:
-    active: devel
+    active: ${ACTIVE_PROFILES:default}
   cloud:
     config:
-      uri: https://example.org
-      username: changeme
-      password: changeit
+      enabled: ${CONFIG_CLIENT_ENABLED:false}
+      uri: ${CONFIG_URI:https://configserver.example.org}
+      username: ${CONFIG_USER:user}
+      password: ${CONFIG_PASSWORD:changeit}

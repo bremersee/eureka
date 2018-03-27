@@ -1,0 +1,47 @@
+server:
+  port: ${SERVER_PORT:8761}
+  servlet:
+    context-path: ${CONTEXT_PATH:/}
+  use-forward-headers: ${USE_FORWARD_HEADERS:true}
+  tomcat:
+    remote-ip-header: x-forwarded-for
+    protocol-header: x-forwarded-proto
+    port-header: x-forwarded-port
+
+spring:
+  security:
+    user:
+      name: ${SECURITY_USER:user}
+      password: ${SECURITY_PASSWORD:changeit}
+      roles: ${SECURITY_ROLE:EUREKA}
+
+logging:
+  level:
+    org.springframework: ${LOG_LEVEL_SPRING:INFO}
+    org.bremersee: ${LOG_LEVEL_BREMERSEE:DEBUG}
+
+
+eureka:
+  instance:
+    hostname: ${HOST_NAME:eureka}
+  client:
+    registerWithEureka: false
+    fetchRegistry: false
+    serviceUrl:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+
+---
+
+spring:
+  profiles: logfiles
+
+logging:
+  path: ${LOG_PATH:/var/log}
+  file:
+    max-history: ${LOG_MAX_HISTORY:25}
+
+server:
+  tomcat:
+    accesslog:
+      enabled: ${ACCESS_LOG_ENABLED:true}
+      directory: ${LOG_PATH:/var/log}
