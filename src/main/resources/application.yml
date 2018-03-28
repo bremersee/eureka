@@ -17,9 +17,9 @@ spring:
 
 logging:
   level:
+    ROOT: ${LOG_LEVEL_ROOT:INFO}
     org.springframework: ${LOG_LEVEL_SPRING:INFO}
     org.bremersee: ${LOG_LEVEL_BREMERSEE:DEBUG}
-
 
 eureka:
   instance:
