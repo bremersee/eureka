@@ -367,12 +367,12 @@
           </execution>
         </executions>
         <configuration>
+          <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
           <repository>docker.io/bremersee/eureka</repository>
           <tag>latest</tag>
           <buildArgs>
             <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
           </buildArgs>
-          <!-- <useMavenSettingsForAuth>true</useMavenSettingsForAuth> -->
         </configuration>
       </plugin>
     </plugins>

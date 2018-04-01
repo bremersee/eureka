@@ -36,7 +36,7 @@ spring:
   profiles: logfiles
 
 logging:
-  path: ${LOG_PATH:/var/log}
+  path: ${LOG_PATH:/var/log/eureka}
   file:
     max-history: ${LOG_MAX_HISTORY:25}
 
