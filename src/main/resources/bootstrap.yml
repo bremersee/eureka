@@ -9,3 +9,4 @@ spring:
       uri: ${CONFIG_URI:https://configserver.example.org}
       username: ${CONFIG_USER:user}
       password: ${CONFIG_PASSWORD:changeit}
+      fail-fast: ${CONFIG_CLIENT_FAIL_FAST:true}
