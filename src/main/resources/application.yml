@@ -1,3 +1,18 @@
+eureka:
+  instance:
+    hostname: ${HOST_NAME:localhost}
+  client:
+    registerWithEureka: false
+    fetchRegistry: false
+    serviceUrl:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+
+logging:
+  level:
+    ROOT: ${LOG_LEVEL_ROOT:INFO}
+    org.springframework: ${LOG_LEVEL_SPRING:INFO}
+    org.bremersee: ${LOG_LEVEL_BREMERSEE:DEBUG}
+
 server:
   port: ${SERVER_PORT:8761}
   servlet:
@@ -15,21 +30,6 @@ spring:
       password: ${SECURITY_PASSWORD:changeit}
       roles: ${SECURITY_ROLE:EUREKA}
 
-logging:
-  level:
-    ROOT: ${LOG_LEVEL_ROOT:INFO}
-    org.springframework: ${LOG_LEVEL_SPRING:INFO}
-    org.bremersee: ${LOG_LEVEL_BREMERSEE:DEBUG}
-
-eureka:
-  instance:
-    hostname: ${HOST_NAME:eureka}
-  client:
-    registerWithEureka: false
-    fetchRegistry: false
-    serviceUrl:
-      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
-
 ---
 
 spring:
@@ -44,4 +44,4 @@ server:
   tomcat:
     accesslog:
       enabled: ${ACCESS_LOG_ENABLED:true}
-      directory: ${LOG_PATH:/var/log}
+      directory: ${LOG_PATH:/var/log/eureka}
