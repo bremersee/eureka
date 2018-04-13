@@ -39,6 +39,9 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
   private static final Logger LOG = LoggerFactory.getLogger(WebSecurityConfiguration.class);
 
+  private static final String DEFAULT_ACCESS = "hasIpAddress('127.0.0.1') "
+      + "or hasIpAddress('::1') or isAuthenticated()";
+
   private Environment env;
 
   @Autowired
@@ -53,7 +56,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         .httpBasic().realmName(env.getProperty("spring.application.name", "eureka"))
         .and()
         .authorizeRequests()
-        .anyRequest().authenticated();
+        .anyRequest()
+        .access(env.getProperty("bremersee.access.default-access", DEFAULT_ACCESS));
   }
 
   @Bean

@@ -1,3 +1,7 @@
+bremersee:
+  access:
+    default-access: "hasIpAddress('127.0.0.1') or hasIpAddress('::1') or isAuthenticated()"
+
 eureka:
   instance:
     hostname: ${HOST_NAME:localhost}
