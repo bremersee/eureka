@@ -13,7 +13,7 @@
 
   <groupId>org.bremersee</groupId>
   <artifactId>eureka</artifactId>
-  <version>1.1.0</version>
+  <version>1.1.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>eureka</name>
@@ -49,7 +49,7 @@
     <sonar.jacoco.reportMissing.force.zero>true</sonar.jacoco.reportMissing.force.zero>
     <dockerfile-maven-version>1.4.0</dockerfile-maven-version>
     <dockerfile.skip>true</dockerfile.skip>
-    <dockerfile.tag>1.1.0</dockerfile.tag>
+    <dockerfile.tag>latest</dockerfile.tag>
   </properties>
 
   <scm>
