@@ -90,7 +90,7 @@ pipeline {
             echo "Creating service ${SERVICE_NAME_1} with docker image ${DOCKER_IMAGE}:${DEV_TAG}."
             docker node update --label-add eureka=1 $(docker node ls -q -f name=dev-manager-1)
             chmod 755 docker-swarm/service1.sh
-            docker-swarm/service1.sh "${DOCKER_IMAGE}:${DEV_TAG}"
+            docker-swarm/service1.sh "${DOCKER_IMAGE}:${DEV_TAG}" "dev,eureka1"
           fi
           if docker service ls | grep -q ${SERVICE_NAME_2}; then
             echo "Updating service ${SERVICE_NAME_2} with docker image ${DOCKER_IMAGE}:${DEV_TAG}."
@@ -99,7 +99,7 @@ pipeline {
             echo "Creating service ${SERVICE_NAME_2} with docker image ${DOCKER_IMAGE}:${DEV_TAG}."
             docker node update --label-add eureka=2 $(docker node ls -q -f name=dev-manager-2)
             chmod 755 docker-swarm/service2.sh
-            docker-swarm/service2.sh "${DOCKER_IMAGE}:${DEV_TAG}"
+            docker-swarm/service2.sh "${DOCKER_IMAGE}:${DEV_TAG}" "dev,eureka2"
           fi
           if docker service ls | grep -q ${SERVICE_NAME_3}; then
             echo "Updating service ${SERVICE_NAME_3} with docker image ${DOCKER_IMAGE}:${DEV_TAG}."
@@ -108,7 +108,7 @@ pipeline {
             echo "Creating service ${SERVICE_NAME_3} with docker image ${DOCKER_IMAGE}:${DEV_TAG}."
             docker node update --label-add eureka=3 $(docker node ls -q -f name=dev-manager-3)
             chmod 755 docker-swarm/service3.sh
-            docker-swarm/service3.sh "${DOCKER_IMAGE}:${DEV_TAG}"
+            docker-swarm/service3.sh "${DOCKER_IMAGE}:${DEV_TAG}" "dev,eureka3"
           fi
         '''
       }
@@ -129,7 +129,7 @@ pipeline {
             echo "Creating service ${SERVICE_NAME_1} with docker image ${DOCKER_IMAGE}:${PROD_TAG}."
             docker node update --label-add eureka=1 $(docker node ls -q -f name=prod-manager-1)
             chmod 755 docker-swarm/service1.sh
-            docker-swarm/service1.sh "${DOCKER_IMAGE}:${PROD_TAG}"
+            docker-swarm/service1.sh "${DOCKER_IMAGE}:${PROD_TAG}" "prod,eureka1"
           fi
           if docker service ls | grep -q ${SERVICE_NAME_2}; then
             echo "Updating service ${SERVICE_NAME_2} with docker image ${DOCKER_IMAGE}:${PROD_TAG}."
@@ -138,7 +138,7 @@ pipeline {
             echo "Creating service ${SERVICE_NAME_2} with docker image ${DOCKER_IMAGE}:${PROD_TAG}."
             docker node update --label-add eureka=2 $(docker node ls -q -f name=prod-manager-2)
             chmod 755 docker-swarm/service2.sh
-            docker-swarm/service2.sh "${DOCKER_IMAGE}:${PROD_TAG}"
+            docker-swarm/service2.sh "${DOCKER_IMAGE}:${PROD_TAG}" "prod,eureka2"
           fi
           if docker service ls | grep -q ${SERVICE_NAME_3}; then
             echo "Updating service ${SERVICE_NAME_3} with docker image ${DOCKER_IMAGE}:${PROD_TAG}."
@@ -147,7 +147,7 @@ pipeline {
             echo "Creating service ${SERVICE_NAME_3} with docker image ${DOCKER_IMAGE}:${PROD_TAG}."
             docker node update --label-add eureka=3 $(docker node ls -q -f name=prod-manager-3)
             chmod 755 docker-swarm/service3.sh
-            docker-swarm/service3.sh "${DOCKER_IMAGE}:${PROD_TAG}"
+            docker-swarm/service3.sh "${DOCKER_IMAGE}:${PROD_TAG}" "prod,eureka3"
           fi
         '''
       }
