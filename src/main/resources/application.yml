@@ -24,9 +24,9 @@ eureka:
     prefer-ip-address: ${PREFER_IP_ADDRESS:true}
     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
   client:
-    registerWithEureka: ${REGISTER_WITH_EUREKA:false}
-    fetchRegistry: ${FETCH_REGISTRY:false}
-    serviceUrl:
+    register-with-eureka: ${REGISTER_WITH_EUREKA:false}
+    fetch-registry: ${FETCH_REGISTRY:false}
+    service-url:
       defaultZone: ${DEFAULT_ZONE:http://${bremersee.access.client-user-name}:${bremersee.access.client-user-password}@${eureka.instance.hostname}:${server.port}/eureka/}
 
 logging:
