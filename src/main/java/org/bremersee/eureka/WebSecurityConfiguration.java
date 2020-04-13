@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 /**
+ * Extended spring boot web security configuration:
+ * <ul>
+ * <li>Disables CSRF
+ * <li>Enables Basic Authentication for users configured with {@link WebSecurityConfiguration}
+ * <li>Enables free access based on IP addresses configured with {@link WebSecurityConfiguration}
+ * </ul>
+ *
  * @author Christian Bremer
  */
 @Configuration
@@ -62,9 +69,9 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         .requestMatchers(EndpointRequest.to(HealthEndpoint.class))
         .permitAll()
         .requestMatchers(EndpointRequest.toAnyEndpoint())
-        .access(properties.getActuator().buildAccess())
+        .access(properties.buildActuatorAccess())
         .antMatchers("/**")
-        .access(properties.getApplication().buildAccess())
+        .access(properties.buildApplicationAccess())
         .and()
         .csrf().disable()
         .userDetailsService(userDetailsService())
@@ -83,7 +90,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     log.info("Building user details service with {}", properties);
     final PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-    final UserDetails[] userDetails = properties.getUsers().stream().map(
+    final UserDetails[] userDetails = properties.buildUsers().stream().map(
         simpleUser -> User.builder()
             .username(simpleUser.getName())
             .password(simpleUser.getPassword())
@@ -94,5 +101,4 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         .toArray(UserDetails[]::new);
     return new InMemoryUserDetailsManager(userDetails);
   }
-
 }

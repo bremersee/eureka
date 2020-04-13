@@ -1,26 +1,19 @@
+info:
+  app:
+    name: ${spring.application.name}
+    version: 1.2.0
+    description: Bremersee's Spring Eureka Server.
+
 bremersee:
   access:
-    application:
-      authorities:
-      - "ROLE_EUREKA"
-      ip-addresses:
-        - "127.0.0.1"
-        - "::1"
-    actuator:
-      authorities:
-      - "ROLE_ACTUATOR"
-      ip-addresses:
-      - "127.0.0.1"
-      - "::1"
-    users:
-      - name: eureka
-        password: secret4EUREKA
-        authorities:
-        - "ROLE_EUREKA"
-      - name: actuator
-        password: secret4ACTUATOR
-        authorities:
-        - "ROLE_ACTUATOR"
+    application-access: ${APPLICATION_ACCESS:hasIpAddress('127.0.0.1/32') or hasIpAddress('::1')}
+    actuator-access: ${ACTUATOR_ACCESS:hasIpAddress('127.0.0.1/32') or hasIpAddress('::1')}
+    client-user-name: ${CLIENT_USER_NAME:user}
+    client-user-password: ${CLIENT_USER_PASSWORD:changeit}
+    actuator-user-name: ${ACTUATOR_USER_NAME:}
+    actuator-user-password: ${ACTUATOR_USER_PASSWORD:}
+    admin-user-name: ${ADMIN_USER_NAME:}
+    admin-user-password: ${ADMIN_USER_PASSWORD:}
 
 eureka:
   instance:
@@ -29,7 +22,7 @@ eureka:
     registerWithEureka: false
     fetchRegistry: false
     serviceUrl:
-      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+      defaultZone: http://${bremersee.access.client-user-name}:${bremersee.access.client-user-password}@${eureka.instance.hostname}:${server.port}/eureka/
 
 logging:
   level:
@@ -42,29 +35,19 @@ management:
     web:
       exposure:
         include: "*"
+      cors:
+        allowed-headers: "*"
+        allowed-methods: "*"
+        allowed-origins: "*"
 
 server:
   port: ${SERVER_PORT:8761}
   servlet:
     context-path: ${CONTEXT_PATH:/}
-  use-forward-headers: ${USE_FORWARD_HEADERS:true}
+  forward-headers-strategy: native
   tomcat:
     remote-ip-header: x-forwarded-for
     protocol-header: x-forwarded-proto
     port-header: x-forwarded-port
-
----
-
-spring:
-  profiles: logfiles
-
-logging:
-  path: ${LOG_PATH:/var/log/eureka}
-  file:
-    max-history: ${LOG_MAX_HISTORY:25}
-
-server:
-  tomcat:
     accesslog:
-      enabled: ${ACCESS_LOG_ENABLED:true}
-      directory: ${LOG_PATH:/var/log/eureka}
+      enabled: false
