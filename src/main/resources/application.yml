@@ -8,7 +8,7 @@ bremersee:
   access:
     application-access: ${APPLICATION_ACCESS:hasIpAddress('127.0.0.1/32') or hasIpAddress('::1')}
     actuator-access: ${ACTUATOR_ACCESS:hasIpAddress('127.0.0.1/32') or hasIpAddress('::1')}
-    client-user-name: ${CLIENT_USER_NAME:user}
+    client-user-name: ${CLIENT_USER_NAME:eureka}
     client-user-password: ${CLIENT_USER_PASSWORD:changeit}
     actuator-user-name: ${ACTUATOR_USER_NAME:}
     actuator-user-password: ${ACTUATOR_USER_PASSWORD:}
@@ -16,13 +16,17 @@ bremersee:
     admin-user-password: ${ADMIN_USER_PASSWORD:}
 
 eureka:
+  server:
+    enable-self-preservation: ${ENABLE_SELF_PRESERVATION:true}
+    eviction-interval-timer-in-ms: ${EVICTION_INTERVAL_TIMER:1000}
   instance:
     hostname: ${HOST_NAME:localhost}
+    prefer-ip-address: ${PREFER_IP_ADDRESS:true}
   client:
-    registerWithEureka: false
-    fetchRegistry: false
+    registerWithEureka: ${REGISTER_WITH_EUREKA:false}
+    fetchRegistry: ${FETCH_REGISTRY:false}
     serviceUrl:
-      defaultZone: http://${bremersee.access.client-user-name}:${bremersee.access.client-user-password}@${eureka.instance.hostname}:${server.port}/eureka/
+      defaultZone: ${DEFAULT_ZONE:http://${bremersee.access.client-user-name}:${bremersee.access.client-user-password}@${eureka.instance.hostname}:${server.port}/eureka/}
 
 logging:
   level:
