@@ -4,7 +4,7 @@ docker service create \
   --name eureka2 \
   --hostname eureka2 \
   --network proxy \
-  --publish=8762:8762 \
+  --publish 8762:8762 \
   --secret config-server-client-user-password \
   --restart-delay 10s \
   --restart-max-attempts 10 \
