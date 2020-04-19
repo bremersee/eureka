@@ -1,39 +1,31 @@
-info:
-  app:
-    name: ${spring.application.name}
-    version: 1.2.0
-    description: Bremersee's Spring Eureka Server.
-
 bremersee:
-  access:
-    application-access: ${APPLICATION_ACCESS:hasIpAddress('127.0.0.1/32') or hasIpAddress('::1')}
-    actuator-access: ${ACTUATOR_ACCESS:hasIpAddress('127.0.0.1/32') or hasIpAddress('::1')}
-    client-user-name: ${CLIENT_USER_NAME:eureka}
-    client-user-password: ${CLIENT_USER_PASSWORD:changeit}
-    actuator-user-name: ${ACTUATOR_USER_NAME:}
-    actuator-user-password: ${ACTUATOR_USER_PASSWORD:}
-    admin-user-name: ${ADMIN_USER_NAME:}
-    admin-user-password: ${ADMIN_USER_PASSWORD:}
+  security:
+    cors:
+      allow-all: true
+  exception-mapping:
+    api-paths:
+      - /eureka/**
+    default-exception-mapping-config:
+      include-stack-trace: true
+      include-cause: true
+      include-application-name: true
+      include-exception-class-name: true
+      include-handler: true
+      include-path: true
 
 eureka:
   server:
     enable-self-preservation: ${ENABLE_SELF_PRESERVATION:true}
     eviction-interval-timer-in-ms: ${EVICTION_INTERVAL_TIMER:1000}
   instance:
-    hostname: ${HOST_NAME:localhost}
+    hostname: ${HOSTNAME:localhost}
     prefer-ip-address: ${PREFER_IP_ADDRESS:true}
-    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    instance-id: ${spring.application.name}:${HOSTNAME:${random.value}}
   client:
     register-with-eureka: ${REGISTER_WITH_EUREKA:false}
     fetch-registry: ${FETCH_REGISTRY:false}
     service-url:
-      defaultZone: ${DEFAULT_ZONE:http://${bremersee.access.client-user-name}:${bremersee.access.client-user-password}@${eureka.instance.hostname}:${server.port}/eureka/}
-
-logging:
-  level:
-    ROOT: ${LOG_LEVEL_ROOT:INFO}
-    org.springframework: ${LOG_LEVEL_SPRING:INFO}
-    org.bremersee: ${LOG_LEVEL_BREMERSEE:DEBUG}
+      defaultZone: ${DEFAULT_ZONE:http://${eureka.instance.hostname}:${server.port}/eureka/}
 
 management:
   endpoints:
@@ -44,15 +36,43 @@ management:
         allowed-headers: "*"
         allowed-methods: "*"
         allowed-origins: "*"
+  endpoint:
+    health:
+      show-details: always
 
 server:
+  forward-headers-strategy: native
   port: ${SERVER_PORT:8761}
   servlet:
     context-path: ${CONTEXT_PATH:/}
-  forward-headers-strategy: native
   tomcat:
     remote-ip-header: x-forwarded-for
     protocol-header: x-forwarded-proto
     port-header: x-forwarded-port
     accesslog:
       enabled: false
+
+logging:
+  level:
+    ROOT: ${LOG_LEVEL_ROOT:INFO}
+    org.springframework: ${LOG_LEVEL_SPRING:INFO}
+    org.bremersee: ${LOG_LEVEL_BREMERSEE:DEBUG}
+
+---
+
+spring:
+  profiles: all-basic-auth
+
+bremersee:
+  security:
+    authentication:
+      enable-jwt-support: false
+      basic-auth-users:
+        - name: "eureka"
+          password: "eureka"
+          authorities:
+            - "ROLE_EUREKA"
+        - name: "actuator"
+          password: "actuator"
+          authorities:
+            - "ROLE_ACTUATOR"

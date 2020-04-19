@@ -1,51 +1,72 @@
+/*
+ * Copyright 2020 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.bremersee.eureka;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestInstance.Lifecycle;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 
+/**
+ * The all basic auth tests.
+ *
+ * @author Christian Bremer
+ */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
-    "bremersee.access.application-access=hasIpAddress('213.136.81.244')", // disable local access
-    "bremersee.access.admin-user-name=testadmin",
-    "bremersee.access.admin-user-password=pass4admin",
-    "bremersee.access.actuator-access=hasIpAddress('213.136.81.244')", // disable local access
-    "bremersee.access.actuator-user-name=testactuator",
-    "bremersee.access.actuator-user-password=pass4actuator"
+    "bremersee.security.authentication.enable-jwt-support=false"
 })
-@TestInstance(Lifecycle.PER_CLASS) // allows us to use @BeforeAll with a non-static method
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class ApplicationTests {
+@ActiveProfiles({"all-basic-auth"})
+public class AllBasicAuthTests {
 
-  private static final String adminUser = "testadmin";
+  private static final String eurekaUser = "eureka";
 
-  private static final String adminPass = "pass4admin";
+  private static final String eurekaPass = "eureka";
 
-  private static final String actuatorUser = "testactuator";
+  private static final String actuatorUser = "actuator";
 
-  private static final String actuatorPass = "pass4actuator";
+  private static final String actuatorPass = "actuator";
 
+  /**
+   * The rest template.
+   */
   @Autowired
   TestRestTemplate restTemplate;
 
+  /**
+   * Fetch apps.
+   */
   @Test
   void fetchApps() {
     ResponseEntity<String> response = restTemplate
-        .withBasicAuth(adminUser, adminPass)
+        .withBasicAuth(eurekaUser, eurekaPass)
         .getForEntity("/eureka/apps", String.class);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
   }
 
+  /**
+   * Fetch apps and expect unauthorized.
+   */
   @Test
   void fetchAppsAndExpectUnauthorized() {
     ResponseEntity<String> response = restTemplate
@@ -53,23 +74,40 @@ public class ApplicationTests {
     assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
   }
 
+  /**
+   * Fetch health.
+   */
+  @Test
+  void fetchHealth() {
+    ResponseEntity<String> response = restTemplate
+        .getForEntity("/actuator/health", String.class);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+  }
+
+  /**
+   * Fetch info.
+   */
   @Test
   void fetchInfo() {
     ResponseEntity<String> response = restTemplate
         .getForEntity("/actuator/info", String.class);
     assertEquals(HttpStatus.OK, response.getStatusCode());
-    System.out.println("==> " + response.getBody());
   }
 
+  /**
+   * Fetch metrics.
+   */
   @Test
   void fetchMetrics() {
     ResponseEntity<String> response = restTemplate
         .withBasicAuth(actuatorUser, actuatorPass)
         .getForEntity("/actuator/metrics", String.class);
     assertEquals(HttpStatus.OK, response.getStatusCode());
-    System.out.println("==> " + response.getBody());
   }
 
+  /**
+   * Fetch metrics and expect unauthorized.
+   */
   @Test
   void fetchMetricsAndExpectUnauthorized() {
     ResponseEntity<String> response = restTemplate

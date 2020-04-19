@@ -16,14 +16,23 @@
 
 package org.bremersee.eureka;
 
+import org.bremersee.context.MessageSourceAutoConfiguration;
+import org.bremersee.converter.ModelMapperAutoConfiguration;
+import org.bremersee.web.servlet.BaseCommonConvertersAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
 
 /**
  * The application.
+ *
+ * @author Christian Bremer
  */
-@SpringBootApplication
+@SpringBootApplication(exclude = {
+    ModelMapperAutoConfiguration.class,
+    MessageSourceAutoConfiguration.class,
+    BaseCommonConvertersAutoConfiguration.class
+})
 @EnableEurekaServer
 public class Application {
 
