@@ -1,9 +1,8 @@
 version: '3.4'
 
 volumes:
-  log-data:
-    external:
-      name: common-log
+  common-log:
+    external: true
 
 secrets:
   config-server-client-user:
@@ -24,12 +23,14 @@ services:
     ports:
       - 8761:80
     volumes:
-      - log-data:/opt/log
+      - common-log:/opt/log
     secrets:
+      - config-server-client-user
       - config-server-client-user-password
     environment:
       - APPLICATION_NAME=eureka
-      - ACTIVE_PROFILES=dev
+      - HOST_NAME=eureka_peer1
+      - ACTIVE_PROFILES=swarm,dev
       - CONFIG_CLIENT_ENABLED=true
       - CONFIG_URI=http://config-server
       - CONFIG_USER_FILE=/run/secrets/config-server-client-user
@@ -58,12 +59,14 @@ services:
     ports:
       - 8762:80
     volumes:
-      - log-data:/opt/log
+      - common-log:/opt/log
     secrets:
+      - config-server-client-user
       - config-server-client-user-password
     environment:
       - APPLICATION_NAME=eureka
-      - ACTIVE_PROFILES=dev
+      - HOST_NAME=eureka_peer2
+      - ACTIVE_PROFILES=swarm,dev
       - CONFIG_CLIENT_ENABLED=true
       - CONFIG_URI=http://config-server
       - CONFIG_USER_FILE=/run/secrets/config-server-client-user
@@ -92,12 +95,14 @@ services:
     ports:
       - 8763:80
     volumes:
-      - log-data:/opt/log
+      - common-log:/opt/log
     secrets:
+      - config-server-client-user
       - config-server-client-user-password
     environment:
       - APPLICATION_NAME=eureka
-      - ACTIVE_PROFILES=dev
+      - HOST_NAME=eureka_peer3
+      - ACTIVE_PROFILES=swarm,dev
       - CONFIG_CLIENT_ENABLED=true
       - CONFIG_URI=http://config-server
       - CONFIG_USER_FILE=/run/secrets/config-server-client-user
