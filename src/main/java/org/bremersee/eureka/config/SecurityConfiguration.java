@@ -35,6 +35,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.util.matcher.AndRequestMatcher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.util.Assert;
@@ -80,13 +81,19 @@ public class SecurityConfiguration {
               "/eureka/images/**").permitAll()
           .requestMatchers(EndpointRequest.to(HealthEndpoint.class)).permitAll()
           .requestMatchers(EndpointRequest.to(InfoEndpoint.class)).permitAll()
+          .requestMatchers(new AndRequestMatcher(
+              EndpointRequest.toAnyEndpoint(),
+              new AntPathRequestMatcher("/**", HttpMethod.GET.name())))
+          .access(properties.getActuator().buildAccessExpression(properties::ensureRolePrefix))
           .requestMatchers(EndpointRequest.toAnyEndpoint())
-          .access(properties.getActuator().buildAccessExpression())
+          .access(properties.getActuator().buildAdminAccessExpression(properties::ensureRolePrefix))
           .antMatchers("/eureka/**")
-          .access(properties.getEureka().buildAccessExpression())
+          .access(properties.getEureka().buildAccessExpression(properties::ensureRolePrefix))
           .anyRequest()
-          .access(properties.getApplication()
-              .buildAccessExpression(false, true, false, true, AuthorityConstants.ADMIN_ROLE_NAME))
+          .access(properties.getApplication().buildAccessExpression(
+              false, true, false, true,
+              properties::ensureRolePrefix,
+              AuthorityConstants.ADMIN_ROLE_NAME))
           .and()
           .userDetailsService(userDetailsService())
           .csrf().disable()
@@ -134,7 +141,7 @@ public class SecurityConfiguration {
           .antMatchers("/eureka/css/**", "/eureka/js/**", "/eureka/fonts/**",
               "/eureka/images/**").permitAll()
           .anyRequest()
-          .access(properties.getEureka().buildAccessExpression())
+          .access(properties.getEureka().buildAccessExpression(properties::ensureRolePrefix))
           .and()
           .userDetailsService(userDetailsService())
           .csrf().disable()
@@ -188,11 +195,17 @@ public class SecurityConfiguration {
           .antMatchers(HttpMethod.OPTIONS).permitAll()
           .requestMatchers(EndpointRequest.to(HealthEndpoint.class)).permitAll()
           .requestMatchers(EndpointRequest.to(InfoEndpoint.class)).permitAll()
+          .requestMatchers(new AndRequestMatcher(
+              EndpointRequest.toAnyEndpoint(),
+              new AntPathRequestMatcher("/**", HttpMethod.GET.name())))
+          .access(properties.getActuator().buildAccessExpression(properties::ensureRolePrefix))
           .requestMatchers(EndpointRequest.toAnyEndpoint())
-          .access(properties.getActuator().buildAccessExpression())
+          .access(properties.getActuator().buildAdminAccessExpression(properties::ensureRolePrefix))
           .anyRequest()
-          .access(properties.getApplication()
-              .buildAccessExpression(false, true, false, true, AuthorityConstants.ADMIN_ROLE_NAME))
+          .access(properties.getApplication().buildAccessExpression(
+              false, true, false, true,
+              properties::ensureRolePrefix,
+              AuthorityConstants.ADMIN_ROLE_NAME))
           .and()
           .sessionManagement()
           .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
