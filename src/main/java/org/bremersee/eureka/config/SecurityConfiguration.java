@@ -76,6 +76,8 @@ public class SecurityConfiguration {
       http
           .authorizeRequests()
           .antMatchers(HttpMethod.OPTIONS).permitAll()
+          .antMatchers("/eureka/css/**", "/eureka/js/**", "/eureka/fonts/**",
+              "/eureka/images/**").permitAll()
           .requestMatchers(EndpointRequest.to(HealthEndpoint.class)).permitAll()
           .requestMatchers(EndpointRequest.to(InfoEndpoint.class)).permitAll()
           .requestMatchers(EndpointRequest.toAnyEndpoint())
@@ -129,6 +131,8 @@ public class SecurityConfiguration {
           .requestMatcher(new AntPathRequestMatcher("/eureka/**"))
           .authorizeRequests()
           .antMatchers(HttpMethod.OPTIONS).permitAll()
+          .antMatchers("/eureka/css/**", "/eureka/js/**", "/eureka/fonts/**",
+              "/eureka/images/**").permitAll()
           .anyRequest()
           .access(properties.getEureka().buildAccessExpression())
           .and()
