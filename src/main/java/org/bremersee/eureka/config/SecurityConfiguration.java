@@ -35,6 +35,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.util.Assert;
 
@@ -46,11 +47,6 @@ import org.springframework.util.Assert;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
-
-  private static final String[] DEFAULT_APPLICATION_ROLES = {
-      AuthorityConstants.ADMIN_ROLE_NAME,
-      "ROLE_EUREKA"
-  };
 
   /**
    * The all basic auth.
@@ -84,9 +80,11 @@ public class SecurityConfiguration {
           .requestMatchers(EndpointRequest.to(InfoEndpoint.class)).permitAll()
           .requestMatchers(EndpointRequest.toAnyEndpoint())
           .access(properties.getActuator().buildAccessExpression())
-          .requestMatchers(new NegatedRequestMatcher(EndpointRequest.toAnyEndpoint()))
+          .antMatchers("/eureka/**")
+          .access(properties.getEureka().buildAccessExpression())
+          .anyRequest()
           .access(properties.getApplication()
-              .buildAccessExpression(false, true, true, true, DEFAULT_APPLICATION_ROLES))
+              .buildAccessExpression(false, true, false, true, AuthorityConstants.ADMIN_ROLE_NAME))
           .and()
           .userDetailsService(userDetailsService())
           .csrf().disable()
@@ -97,12 +95,13 @@ public class SecurityConfiguration {
     @Bean
     @Override
     public UserDetailsService userDetailsService() {
-      return new InMemoryUserDetailsManager(properties.buildBasicAuthUserDetails());
+      return new InMemoryUserDetailsManager(properties.getEureka().buildBasicAuthUserDetails(
+          properties.buildBasicAuthUserDetails()));
     }
   }
 
   /**
-   * The application basic auth.
+   * The basic auth.
    */
   @ConditionalOnProperty(
       prefix = "bremersee.security.authentication",
@@ -111,7 +110,7 @@ public class SecurityConfiguration {
   @Order(51)
   @Configuration
   @EnableConfigurationProperties(AuthenticationProperties.class)
-  static class ApplicationBasicAuth extends WebSecurityConfigurerAdapter {
+  static class BasicAuth extends WebSecurityConfigurerAdapter {
 
     private AuthenticationProperties properties;
 
@@ -120,19 +119,18 @@ public class SecurityConfiguration {
      *
      * @param properties the properties
      */
-    public ApplicationBasicAuth(AuthenticationProperties properties) {
+    public BasicAuth(AuthenticationProperties properties) {
       this.properties = properties;
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
       http
-          .requestMatcher(new NegatedRequestMatcher(EndpointRequest.toAnyEndpoint()))
+          .requestMatcher(new AntPathRequestMatcher("/eureka/**"))
           .authorizeRequests()
           .antMatchers(HttpMethod.OPTIONS).permitAll()
           .anyRequest()
-          .access(properties.getApplication()
-              .buildAccessExpression(false, true, true, true, DEFAULT_APPLICATION_ROLES))
+          .access(properties.getEureka().buildAccessExpression())
           .and()
           .userDetailsService(userDetailsService())
           .csrf().disable()
@@ -143,12 +141,12 @@ public class SecurityConfiguration {
     @Bean
     @Override
     public UserDetailsService userDetailsService() {
-      return new InMemoryUserDetailsManager(properties.buildBasicAuthUserDetails());
+      return new InMemoryUserDetailsManager(properties.getEureka().buildBasicAuthUserDetails());
     }
   }
 
   /**
-   * The actuator open id.
+   * The open id.
    */
   @ConditionalOnProperty(
       prefix = "bremersee.security.authentication",
@@ -157,7 +155,7 @@ public class SecurityConfiguration {
   @Order(52)
   @Configuration
   @EnableConfigurationProperties(AuthenticationProperties.class)
-  static class ActuatorOpenId extends WebSecurityConfigurerAdapter {
+  static class OpenId extends WebSecurityConfigurerAdapter {
 
     private final AuthenticationProperties properties;
 
@@ -169,7 +167,7 @@ public class SecurityConfiguration {
      * @param properties the properties
      * @param passwordFlowAuthenticationManager the password flow authentication manager
      */
-    public ActuatorOpenId(AuthenticationProperties properties,
+    public OpenId(AuthenticationProperties properties,
         ObjectProvider<PasswordFlowAuthenticationManager> passwordFlowAuthenticationManager) {
       this.properties = properties;
       this.passwordFlowAuthenticationManager = passwordFlowAuthenticationManager.getIfAvailable();
@@ -181,13 +179,16 @@ public class SecurityConfiguration {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
       http
-          .requestMatcher(EndpointRequest.toAnyEndpoint())
+          .requestMatcher(new NegatedRequestMatcher(new AntPathRequestMatcher("/eureka/**")))
           .authorizeRequests()
           .antMatchers(HttpMethod.OPTIONS).permitAll()
           .requestMatchers(EndpointRequest.to(HealthEndpoint.class)).permitAll()
           .requestMatchers(EndpointRequest.to(InfoEndpoint.class)).permitAll()
-          .anyRequest()
+          .requestMatchers(EndpointRequest.toAnyEndpoint())
           .access(properties.getActuator().buildAccessExpression())
+          .anyRequest()
+          .access(properties.getApplication()
+              .buildAccessExpression(false, true, false, true, AuthorityConstants.ADMIN_ROLE_NAME))
           .and()
           .sessionManagement()
           .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

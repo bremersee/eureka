@@ -35,12 +35,16 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
     "bremersee.security.authentication.enable-jwt-support=false"
 })
-@ActiveProfiles({"all-basic-auth"})
-public class AllBasicAuthTests {
+@ActiveProfiles({"basic-auth"})
+public class BasicAuthTests {
 
   private static final String eurekaUser = "eureka";
 
   private static final String eurekaPass = "eureka";
+
+  private static final String adminUser = "admin";
+
+  private static final String adminPass = "admin";
 
   private static final String actuatorUser = "actuator";
 
@@ -51,6 +55,30 @@ public class AllBasicAuthTests {
    */
   @Autowired
   TestRestTemplate restTemplate;
+
+  /**
+   * Fetch web.
+   */
+  @Test
+  void fetchWeb() {
+    ResponseEntity<String> response = restTemplate
+        .withBasicAuth(adminUser, adminPass)
+        .getForEntity("/", String.class);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+  }
+
+  /**
+   * Fetch web.
+   */
+  @Test
+  void fetchWebAndExpectForbidden() {
+    ResponseEntity<String> response = restTemplate
+        .withBasicAuth(eurekaUser, eurekaPass)
+        .getForEntity("/", String.class);
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    assertNotNull(response.getBody());
+  }
 
   /**
    * Fetch apps.

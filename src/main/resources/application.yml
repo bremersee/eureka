@@ -1,5 +1,9 @@
 bremersee:
   security:
+    authentication:
+      eureka:
+        username: ${EUREKA_USERNAME:eureka}
+        password: ${EUREKA_PASSWORD:eureka}
     cors:
       allow-all: true
   exception-mapping:
@@ -18,7 +22,7 @@ eureka:
     enable-self-preservation: ${ENABLE_SELF_PRESERVATION:true}
     eviction-interval-timer-in-ms: ${EVICTION_INTERVAL_TIMER:1000}
   instance:
-    hostname: ${HOSTNAME:localhost}
+    hostname: ${HOST_NAME:localhost}
     prefer-ip-address: ${PREFER_IP_ADDRESS:true}
     instance-id: ${spring.application.name}:${HOSTNAME:${random.value}}
   client:
@@ -61,18 +65,21 @@ logging:
 ---
 
 spring:
-  profiles: all-basic-auth
+  profiles: basic-auth
 
 bremersee:
   security:
     authentication:
       enable-jwt-support: false
       basic-auth-users:
-        - name: "eureka"
-          password: "eureka"
+        - name: "admin"
+          password: "admin"
           authorities:
-            - "ROLE_EUREKA"
+            - "ROLE_ADMIN"
         - name: "actuator"
           password: "actuator"
           authorities:
             - "ROLE_ACTUATOR"
+      application:
+        admin-roles:
+          - "ROLE_ADMIN"

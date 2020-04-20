@@ -17,11 +17,13 @@ networks:
 services:
   peer1:
     image: bremersee/eureka:snapshot
-    hostname: eureka_peer1
+    hostname: eureka1
     networks:
-      - proxy
+      proxy:
+        aliases:
+          - eureka1
     ports:
-      - 8761:80
+      - 8761:8761
     volumes:
       - common-log:/opt/log
     secrets:
@@ -29,7 +31,7 @@ services:
       - config-server-client-user-password
     environment:
       - APPLICATION_NAME=eureka
-      - HOST_NAME=eureka_peer1
+      - HOST_NAME=eureka1
       - ACTIVE_PROFILES=swarm,dev
       - CONFIG_CLIENT_ENABLED=true
       - CONFIG_URI=http://config-server
@@ -40,7 +42,7 @@ services:
       - CONFIG_RETRY_MAX_INTERVAL=4000
       - CONFIG_RETRY_MAX_ATTEMPTS=8
       - CONFIG_RETRY_MULTIPLIER=1.1
-      - SERVER_PORT=80
+      - SERVER_PORT=8761
     deploy:
       replicas: 1
       restart_policy:
@@ -53,11 +55,13 @@ services:
 
   peer2:
     image: bremersee/eureka:snapshot
-    hostname: eureka_peer2
+    hostname: eureka2
     networks:
-      - proxy
+      proxy:
+        aliases:
+          - eureka2
     ports:
-      - 8762:80
+      - 8762:8761
     volumes:
       - common-log:/opt/log
     secrets:
@@ -65,7 +69,7 @@ services:
       - config-server-client-user-password
     environment:
       - APPLICATION_NAME=eureka
-      - HOST_NAME=eureka_peer2
+      - HOST_NAME=eureka2
       - ACTIVE_PROFILES=swarm,dev
       - CONFIG_CLIENT_ENABLED=true
       - CONFIG_URI=http://config-server
@@ -76,7 +80,7 @@ services:
       - CONFIG_RETRY_MAX_INTERVAL=4000
       - CONFIG_RETRY_MAX_ATTEMPTS=8
       - CONFIG_RETRY_MULTIPLIER=1.1
-      - SERVER_PORT=80
+      - SERVER_PORT=8761
     deploy:
       replicas: 1
       restart_policy:
@@ -89,11 +93,13 @@ services:
 
   peer3:
     image: bremersee/eureka:snapshot
-    hostname: eureka_peer3
+    hostname: eureka3
     networks:
-      - proxy
+      proxy:
+        aliases:
+          - eureka3
     ports:
-      - 8763:80
+      - 8763:8761
     volumes:
       - common-log:/opt/log
     secrets:
@@ -101,7 +107,7 @@ services:
       - config-server-client-user-password
     environment:
       - APPLICATION_NAME=eureka
-      - HOST_NAME=eureka_peer3
+      - HOST_NAME=eureka3
       - ACTIVE_PROFILES=swarm,dev
       - CONFIG_CLIENT_ENABLED=true
       - CONFIG_URI=http://config-server
@@ -112,7 +118,7 @@ services:
       - CONFIG_RETRY_MAX_INTERVAL=4000
       - CONFIG_RETRY_MAX_ATTEMPTS=8
       - CONFIG_RETRY_MULTIPLIER=1.1
-      - SERVER_PORT=80
+      - SERVER_PORT=8761
     deploy:
       replicas: 1
       restart_policy:

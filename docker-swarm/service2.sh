@@ -4,7 +4,8 @@ docker service create \
   --name eureka2 \
   --hostname eureka2 \
   --network proxy \
-  --publish 8762:8762 \
+  --publish 8762:8761 \
+  --secret config-server-client-user \
   --secret config-server-client-user-password \
   --restart-delay 10s \
   --restart-max-attempts 10 \
@@ -14,8 +15,8 @@ docker service create \
   -e APPLICATION_NAME='eureka' \
   -e ACTIVE_PROFILES=$2 \
   -e CONFIG_CLIENT_ENABLED='true' \
-  -e CONFIG_URI='http://config-server:8888' \
-  -e CONFIG_USER='configclient' \
+  -e CONFIG_URI='http://config-server' \
+  -e CONFIG_USER_FILE='/run/secrets/config-server-client-user' \
   -e CONFIG_PASSWORD_FILE='/run/secrets/config-server-client-user-password' \
   -e CONFIG_CLIENT_FAIL_FAST='true' \
   -e CONFIG_RETRY_INIT_INTERVAL='3000' \
