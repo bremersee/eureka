@@ -1,9 +1,6 @@
 pipeline {
   agent none
   environment {
-    SERVICE_NAME_1='eureka1'
-    SERVICE_NAME_2='eureka2'
-    SERVICE_NAME_3='eureka3'
     DOCKER_IMAGE='bremersee/eureka'
     DEV_TAG='snapshot'
     PROD_TAG='latest'
@@ -96,33 +93,7 @@ pipeline {
       }
       steps {
         sh '''
-          if docker service ls | grep -q ${SERVICE_NAME_1}; then
-            echo "Updating service ${SERVICE_NAME_1} with docker image ${DOCKER_IMAGE}:${PROD_TAG}."
-            docker service update --image ${DOCKER_IMAGE}:${PROD_TAG} ${SERVICE_NAME_1}
-          else
-            echo "Creating service ${SERVICE_NAME_1} with docker image ${DOCKER_IMAGE}:${PROD_TAG}."
-            docker node update --label-add eureka=1 $(docker node ls -q -f name=prod-manager-1)
-            chmod 755 docker-swarm/service1.sh
-            docker-swarm/service1.sh "${DOCKER_IMAGE}:${PROD_TAG}" "prod,eureka1"
-          fi
-          if docker service ls | grep -q ${SERVICE_NAME_2}; then
-            echo "Updating service ${SERVICE_NAME_2} with docker image ${DOCKER_IMAGE}:${PROD_TAG}."
-            docker service update --image ${DOCKER_IMAGE}:${PROD_TAG} ${SERVICE_NAME_2}
-          else
-            echo "Creating service ${SERVICE_NAME_2} with docker image ${DOCKER_IMAGE}:${PROD_TAG}."
-            docker node update --label-add eureka=2 $(docker node ls -q -f name=prod-manager-2)
-            chmod 755 docker-swarm/service2.sh
-            docker-swarm/service2.sh "${DOCKER_IMAGE}:${PROD_TAG}" "prod,eureka2"
-          fi
-          if docker service ls | grep -q ${SERVICE_NAME_3}; then
-            echo "Updating service ${SERVICE_NAME_3} with docker image ${DOCKER_IMAGE}:${PROD_TAG}."
-            docker service update --image ${DOCKER_IMAGE}:${PROD_TAG} ${SERVICE_NAME_3}
-          else
-            echo "Creating service ${SERVICE_NAME_3} with docker image ${DOCKER_IMAGE}:${PROD_TAG}."
-            docker node update --label-add eureka=3 $(docker node ls -q -f name=prod-manager-3)
-            chmod 755 docker-swarm/service3.sh
-            docker-swarm/service3.sh "${DOCKER_IMAGE}:${PROD_TAG}" "prod,eureka3"
-          fi
+          docker stack deploy -c docker-swarm/eureka-prod-compose.yml eureka
         '''
       }
     }
