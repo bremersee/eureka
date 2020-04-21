@@ -24,7 +24,7 @@
 
     <start-class>org.bremersee.eureka.Application</start-class>
 
-    <common-base.version>2.0.1-SNAPSHOT</common-base.version>
+    <common-base.version>2.0.1</common-base.version>
   </properties>
 
   <scm>

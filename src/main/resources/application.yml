@@ -17,6 +17,12 @@ bremersee:
       include-handler: true
       include-path: true
 
+spring:
+  cloud:
+    loadbalancer:
+      ribbon:
+        enabled: false
+
 eureka:
   server:
     enable-self-preservation: ${ENABLE_SELF_PRESERVATION:true}
@@ -59,6 +65,7 @@ server:
 logging:
   level:
     ROOT: ${LOG_LEVEL_ROOT:INFO}
+    com.netflix.eureka.registry: ${EUREKA_REGISTRY:WARN}
     org.springframework: ${LOG_LEVEL_SPRING:INFO}
     org.bremersee: ${LOG_LEVEL_BREMERSEE:DEBUG}
 

@@ -50,7 +50,7 @@ import org.springframework.util.Assert;
 public class SecurityConfiguration {
 
   /**
-   * The all basic auth.
+   * The only simple user authentication.
    */
   @ConditionalOnProperty(
       prefix = "bremersee.security.authentication",
@@ -59,16 +59,16 @@ public class SecurityConfiguration {
   @Order(51)
   @Configuration
   @EnableConfigurationProperties(AuthenticationProperties.class)
-  static class AllBasicAuth extends WebSecurityConfigurerAdapter {
+  static class OnlySimpleUserAuthentication extends WebSecurityConfigurerAdapter {
 
     private AuthenticationProperties properties;
 
     /**
-     * Instantiates a new all basic auth.
+     * Instantiates a only simple user authentication.
      *
      * @param properties the properties
      */
-    public AllBasicAuth(AuthenticationProperties properties) {
+    public OnlySimpleUserAuthentication(AuthenticationProperties properties) {
       this.properties = properties;
     }
 
@@ -110,7 +110,7 @@ public class SecurityConfiguration {
   }
 
   /**
-   * The basic auth.
+   * The eureka authentication.
    */
   @ConditionalOnProperty(
       prefix = "bremersee.security.authentication",
@@ -119,16 +119,16 @@ public class SecurityConfiguration {
   @Order(51)
   @Configuration
   @EnableConfigurationProperties(AuthenticationProperties.class)
-  static class BasicAuth extends WebSecurityConfigurerAdapter {
+  static class EurekaAuthentication extends WebSecurityConfigurerAdapter {
 
     private AuthenticationProperties properties;
 
     /**
-     * Instantiates a new application basic auth.
+     * Instantiates a new eureka authentication.
      *
      * @param properties the properties
      */
-    public BasicAuth(AuthenticationProperties properties) {
+    public EurekaAuthentication(AuthenticationProperties properties) {
       this.properties = properties;
     }
 
@@ -157,7 +157,7 @@ public class SecurityConfiguration {
   }
 
   /**
-   * The open id.
+   * The password flow authentication.
    */
   @ConditionalOnProperty(
       prefix = "bremersee.security.authentication",
@@ -166,19 +166,20 @@ public class SecurityConfiguration {
   @Order(52)
   @Configuration
   @EnableConfigurationProperties(AuthenticationProperties.class)
-  static class OpenId extends WebSecurityConfigurerAdapter {
+  static class PasswordFlowAuthentication extends WebSecurityConfigurerAdapter {
 
     private final AuthenticationProperties properties;
 
     private final PasswordFlowAuthenticationManager passwordFlowAuthenticationManager;
 
     /**
-     * Instantiates a new actuator open id.
+     * Instantiates a new password flow authentication.
      *
      * @param properties the properties
      * @param passwordFlowAuthenticationManager the password flow authentication manager
      */
-    public OpenId(AuthenticationProperties properties,
+    public PasswordFlowAuthentication(
+        AuthenticationProperties properties,
         ObjectProvider<PasswordFlowAuthenticationManager> passwordFlowAuthenticationManager) {
       this.properties = properties;
       this.passwordFlowAuthenticationManager = passwordFlowAuthenticationManager.getIfAvailable();
