@@ -13,4 +13,4 @@ This eureka server is more or less a plain Spring Cloud Eureka Server:
 
 - [Release](https://bremersee.github.io/eureka/index.html)
 
-- [Snapshot](https://nexus.bremersee.org/repository/maven-sites/eureka/1.2.0-SNAPSHOT/index.html)
+- [Snapshot](https://nexus.bremersee.org/repository/maven-sites/eureka/1.2.1-SNAPSHOT/index.html)
