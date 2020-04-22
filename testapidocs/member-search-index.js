@@ -1,0 +1,1 @@
+memberSearchIndex = [{"p":"org.bremersee.eureka","c":"BasicAuthTests","l":"BasicAuthTests()","url":"%3Cinit%3E()"}]
