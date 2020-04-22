@@ -1,70 +1,92 @@
 bremersee:
-  access:
-    application:
-      authorities:
-      - "ROLE_EUREKA"
-      ip-addresses:
-        - "127.0.0.1"
-        - "::1"
-    actuator:
-      authorities:
-      - "ROLE_ACTUATOR"
-      ip-addresses:
-      - "127.0.0.1"
-      - "::1"
-    users:
-      - name: eureka
-        password: secret4EUREKA
-        authorities:
-        - "ROLE_EUREKA"
-      - name: actuator
-        password: secret4ACTUATOR
-        authorities:
-        - "ROLE_ACTUATOR"
+  security:
+    authentication:
+      eureka:
+        username: ${EUREKA_USERNAME:eureka}
+        password: ${EUREKA_PASSWORD:eureka}
+    cors:
+      allow-all: true
+  exception-mapping:
+    api-paths:
+      - /eureka/**
+    default-exception-mapping-config:
+      include-stack-trace: true
+      include-cause: true
+      include-application-name: true
+      include-exception-class-name: true
+      include-handler: true
+      include-path: true
+
+spring:
+  cloud:
+    loadbalancer:
+      ribbon:
+        enabled: false
 
 eureka:
+  server:
+    enable-self-preservation: ${ENABLE_SELF_PRESERVATION:true}
+    eviction-interval-timer-in-ms: ${EVICTION_INTERVAL_TIMER:1000}
   instance:
     hostname: ${HOST_NAME:localhost}
+    prefer-ip-address: ${PREFER_IP_ADDRESS:true}
+    instance-id: ${spring.application.name}:${HOSTNAME:${random.value}}
   client:
-    registerWithEureka: false
-    fetchRegistry: false
-    serviceUrl:
-      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
-
-logging:
-  level:
-    ROOT: ${LOG_LEVEL_ROOT:INFO}
-    org.springframework: ${LOG_LEVEL_SPRING:INFO}
-    org.bremersee: ${LOG_LEVEL_BREMERSEE:DEBUG}
+    register-with-eureka: ${REGISTER_WITH_EUREKA:false}
+    fetch-registry: ${FETCH_REGISTRY:false}
+    service-url:
+      defaultZone: ${DEFAULT_ZONE:http://${eureka.instance.hostname}:${server.port}/eureka/}
 
 management:
   endpoints:
     web:
       exposure:
         include: "*"
+      cors:
+        allowed-headers: "*"
+        allowed-methods: "*"
+        allowed-origins: "*"
+  endpoint:
+    health:
+      show-details: always
 
 server:
+  forward-headers-strategy: native
   port: ${SERVER_PORT:8761}
   servlet:
     context-path: ${CONTEXT_PATH:/}
-  use-forward-headers: ${USE_FORWARD_HEADERS:true}
   tomcat:
     remote-ip-header: x-forwarded-for
     protocol-header: x-forwarded-proto
     port-header: x-forwarded-port
+    accesslog:
+      enabled: false
+
+logging:
+  level:
+    ROOT: ${LOG_LEVEL_ROOT:INFO}
+    com.netflix.eureka.registry: ${EUREKA_REGISTRY:WARN}
+    org.springframework: ${LOG_LEVEL_SPRING:INFO}
+    org.bremersee: ${LOG_LEVEL_BREMERSEE:DEBUG}
 
 ---
 
 spring:
-  profiles: logfiles
+  profiles: basic-auth
 
-logging:
-  path: ${LOG_PATH:/var/log/eureka}
-  file:
-    max-history: ${LOG_MAX_HISTORY:25}
-
-server:
-  tomcat:
-    accesslog:
-      enabled: ${ACCESS_LOG_ENABLED:true}
-      directory: ${LOG_PATH:/var/log/eureka}
+bremersee:
+  security:
+    authentication:
+      enable-jwt-support: false
+      basic-auth-users:
+        - name: "admin"
+          password: "admin"
+          authorities:
+            - "ROLE_ADMIN"
+        - name: "actuator"
+          password: "actuator"
+          authorities:
+            - "ROLE_ACTUATOR"
+      application:
+        admin-roles:
+          - "ROLE_ADMIN"

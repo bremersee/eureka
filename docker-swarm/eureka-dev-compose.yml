@@ -1,0 +1,130 @@
+version: '3.4'
+
+volumes:
+  common-log:
+    external: true
+
+secrets:
+  config-server-client-user:
+    external: true
+  config-server-client-user-password:
+    external: true
+
+networks:
+  proxy:
+    external: true    
+
+services:
+  peer1:
+    image: bremersee/eureka:snapshot
+    hostname: eureka1
+    networks:
+      proxy:
+        aliases:
+          - eureka1
+    ports:
+      - 8761:8761
+    volumes:
+      - common-log:/opt/log
+    secrets:
+      - config-server-client-user
+      - config-server-client-user-password
+    environment:
+      - APPLICATION_NAME=eureka
+      - HOST_NAME=eureka1
+      - ACTIVE_PROFILES=swarm,dev
+      - CONFIG_CLIENT_ENABLED=true
+      - CONFIG_URI=http://config-server
+      - CONFIG_USER_FILE=/run/secrets/config-server-client-user
+      - CONFIG_PASSWORD_FILE=/run/secrets/config-server-client-user-password
+      - CONFIG_CLIENT_FAIL_FAST=true
+      - CONFIG_RETRY_INIT_INTERVAL=3000
+      - CONFIG_RETRY_MAX_INTERVAL=4000
+      - CONFIG_RETRY_MAX_ATTEMPTS=8
+      - CONFIG_RETRY_MULTIPLIER=1.1
+      - SERVER_PORT=8761
+    deploy:
+      replicas: 1
+      restart_policy:
+        delay: 10s
+        max_attempts: 10
+        window: 60s
+      placement:
+        constraints:
+          - node.labels.eureka == 1
+
+  peer2:
+    image: bremersee/eureka:snapshot
+    hostname: eureka2
+    networks:
+      proxy:
+        aliases:
+          - eureka2
+    ports:
+      - 8762:8761
+    volumes:
+      - common-log:/opt/log
+    secrets:
+      - config-server-client-user
+      - config-server-client-user-password
+    environment:
+      - APPLICATION_NAME=eureka
+      - HOST_NAME=eureka2
+      - ACTIVE_PROFILES=swarm,dev
+      - CONFIG_CLIENT_ENABLED=true
+      - CONFIG_URI=http://config-server
+      - CONFIG_USER_FILE=/run/secrets/config-server-client-user
+      - CONFIG_PASSWORD_FILE=/run/secrets/config-server-client-user-password
+      - CONFIG_CLIENT_FAIL_FAST=true
+      - CONFIG_RETRY_INIT_INTERVAL=3000
+      - CONFIG_RETRY_MAX_INTERVAL=4000
+      - CONFIG_RETRY_MAX_ATTEMPTS=8
+      - CONFIG_RETRY_MULTIPLIER=1.1
+      - SERVER_PORT=8761
+    deploy:
+      replicas: 1
+      restart_policy:
+        delay: 10s
+        max_attempts: 10
+        window: 60s
+      placement:
+        constraints:
+          - node.labels.eureka == 2
+
+  peer3:
+    image: bremersee/eureka:snapshot
+    hostname: eureka3
+    networks:
+      proxy:
+        aliases:
+          - eureka3
+    ports:
+      - 8763:8761
+    volumes:
+      - common-log:/opt/log
+    secrets:
+      - config-server-client-user
+      - config-server-client-user-password
+    environment:
+      - APPLICATION_NAME=eureka
+      - HOST_NAME=eureka3
+      - ACTIVE_PROFILES=swarm,dev
+      - CONFIG_CLIENT_ENABLED=true
+      - CONFIG_URI=http://config-server
+      - CONFIG_USER_FILE=/run/secrets/config-server-client-user
+      - CONFIG_PASSWORD_FILE=/run/secrets/config-server-client-user-password
+      - CONFIG_CLIENT_FAIL_FAST=true
+      - CONFIG_RETRY_INIT_INTERVAL=3000
+      - CONFIG_RETRY_MAX_INTERVAL=4000
+      - CONFIG_RETRY_MAX_ATTEMPTS=8
+      - CONFIG_RETRY_MULTIPLIER=1.1
+      - SERVER_PORT=8761
+    deploy:
+      replicas: 1
+      restart_policy:
+        delay: 10s
+        max_attempts: 10
+        window: 60s
+      placement:
+        constraints:
+          - node.labels.eureka == 3

@@ -8,9 +8,3 @@ This eureka server is more or less a plain Spring Cloud Eureka Server:
   <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
 </dependency>
 ```
-
-## Maven Site
-
-- [Release](https://bremersee.github.io/eureka/index.html)
-
-- [Snapshot](https://nexus.bremersee.org/repository/maven-sites/eureka/1.2.0-SNAPSHOT/index.html)
