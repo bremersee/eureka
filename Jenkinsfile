@@ -4,6 +4,12 @@ pipeline {
     DOCKER_IMAGE='bremersee/eureka'
     DEV_TAG='snapshot'
     PROD_TAG='latest'
+    PUSH_SNAPSHOT=false
+    PUSH_RELEASE=true
+    DEPLOY_SNAPSHOT=false
+    DEPLOY_RELEASE=true
+    SNAPSHOT_SITE=true
+    RELEASE_SITE=true
   }
   stages {
     stage('Test') {
@@ -38,7 +44,10 @@ pipeline {
         label 'maven'
       }
       when {
-        branch 'develop'
+        allOf {
+          branch 'develop'
+          environment name: 'PUSH_SNAPSHOT', value: 'true'
+        }
       }
       tools {
         jdk 'jdk11'
@@ -57,7 +66,10 @@ pipeline {
         label 'maven'
       }
       when {
-        branch 'master'
+        allOf {
+          branch 'master'
+          environment name: 'PUSH_RELEASE', value: 'true'
+        }
       }
       tools {
         jdk 'jdk11'
@@ -76,7 +88,10 @@ pipeline {
         label 'dev-swarm'
       }
       when {
-        branch 'develop'
+        allOf {
+          branch 'develop'
+          environment name: 'DEPLOY_SNAPSHOT', value: 'true'
+        }
       }
       steps {
         sh '''
@@ -89,7 +104,10 @@ pipeline {
         label 'prod-swarm'
       }
       when {
-        branch 'master'
+        allOf {
+          branch 'master'
+          environment name: 'DEPLOY_RELEASE', value: 'true'
+        }
       }
       steps {
         sh '''
@@ -105,7 +123,10 @@ pipeline {
         CODECOV_TOKEN = credentials('eureka-codecov-token')
       }
       when {
-        branch 'develop'
+        allOf {
+          branch 'develop'
+          environment name: 'SNAPSHOT_SITE', value: 'true'
+        }
       }
       tools {
         jdk 'jdk11'
@@ -128,7 +149,10 @@ pipeline {
         CODECOV_TOKEN = credentials('eureka-codecov-token')
       }
       when {
-        branch 'master'
+        allOf {
+          branch 'master'
+          environment name: 'RELEASE_SITE', value: 'true'
+        }
       }
       tools {
         jdk 'jdk11'

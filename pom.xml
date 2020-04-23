@@ -12,7 +12,7 @@
   </parent>
 
   <artifactId>eureka</artifactId>
-  <version>1.2.1</version>
+  <version>1.2.2-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>eureka</name>
@@ -99,6 +99,15 @@
     <dependency>
       <groupId>io.micrometer</groupId>
       <artifactId>micrometer-registry-prometheus</artifactId>
+    </dependency>
+    <!--
+      JMX-Bean Management for Spring Boot Admin Server:
+      1) Only for servlet based applications
+      2) Set spring.jmx.enabled=true
+    -->
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-core</artifactId>
     </dependency>
 
     <dependency>
