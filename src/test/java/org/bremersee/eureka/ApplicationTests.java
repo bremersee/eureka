@@ -28,15 +28,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
 /**
- * The all basic auth tests.
+ * The application tests.
  *
  * @author Christian Bremer
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
-    "bremersee.security.authentication.enable-jwt-support=false"
-})
-@ActiveProfiles({"basic-auth"})
-public class BasicAuthTests {
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles({"in-memory"})
+public class ApplicationTests {
 
   private static final String eurekaUser = "eureka";
 

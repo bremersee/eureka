@@ -24,7 +24,7 @@
 
     <start-class>org.bremersee.eureka.Application</start-class>
 
-    <common-base.version>2.0.1</common-base.version>
+    <common-base.version>2.1.0-SNAPSHOT</common-base.version>
   </properties>
 
   <scm>
@@ -64,6 +64,20 @@
     </dependency>
     <dependency>
       <groupId>org.bremersee</groupId>
+      <artifactId>common-base-actuator-starter</artifactId>
+      <version>${common-base.version}</version>
+    </dependency>
+    <!--
+      JMX-Bean Management for Spring Boot Admin Server:
+      1) Only for servlet based applications
+      2) Set spring.jmx.enabled=true
+    -->
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.bremersee</groupId>
       <artifactId>common-base-security-starter</artifactId>
       <version>${common-base.version}</version>
     </dependency>
@@ -89,25 +103,6 @@
     <dependency>
       <groupId>org.springframework.retry</groupId>
       <artifactId>spring-retry</artifactId>
-    </dependency>
-
-    <!-- Actuator -->
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-actuator</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.micrometer</groupId>
-      <artifactId>micrometer-registry-prometheus</artifactId>
-    </dependency>
-    <!--
-      JMX-Bean Management for Spring Boot Admin Server:
-      1) Only for servlet based applications
-      2) Set spring.jmx.enabled=true
-    -->
-    <dependency>
-      <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-core</artifactId>
     </dependency>
 
     <dependency>

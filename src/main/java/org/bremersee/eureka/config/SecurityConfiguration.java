@@ -16,29 +16,36 @@
 
 package org.bremersee.eureka.config;
 
-import org.bremersee.security.authentication.AuthenticationProperties;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import org.bremersee.actuator.security.authentication.ActuatorAuthProperties;
+import org.bremersee.security.authentication.AuthProperties;
+import org.bremersee.security.authentication.AuthProperties.PathMatcherProperties;
 import org.bremersee.security.authentication.PasswordFlowAuthenticationManager;
 import org.bremersee.security.core.AuthorityConstants;
+import org.bremersee.web.CorsProperties;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.boot.actuate.info.InfoEndpoint;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.util.matcher.AndRequestMatcher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
-import org.springframework.util.Assert;
 
 /**
  * The security configuration.
@@ -50,86 +57,45 @@ import org.springframework.util.Assert;
 public class SecurityConfiguration {
 
   /**
-   * The only simple user authentication.
+   * The eureka security configuration.
    */
-  @ConditionalOnProperty(
-      prefix = "bremersee.security.authentication",
-      name = "enable-jwt-support",
-      havingValue = "false", matchIfMissing = true)
-  @Order(51)
   @Configuration
-  @EnableConfigurationProperties(AuthenticationProperties.class)
-  static class OnlySimpleUserAuthentication extends WebSecurityConfigurerAdapter {
+  @EnableConfigurationProperties({
+      AuthProperties.class,
+      CorsProperties.class
+  })
+  @Order(49)
+  static class Eureka extends WebSecurityConfigurerAdapter {
 
-    private AuthenticationProperties properties;
+    private final AuthProperties authProperties;
+
+    private final CorsProperties corsProperties;
+
+    private final PasswordEncoder passwordEncoder;
 
     /**
-     * Instantiates a only simple user authentication.
+     * Instantiates a new eureka security configuration.
      *
-     * @param properties the properties
+     * @param authProperties the auth properties
+     * @param corsProperties the cors properties
+     * @param passwordEncoder the password encoder
      */
-    public OnlySimpleUserAuthentication(AuthenticationProperties properties) {
-      this.properties = properties;
+    public Eureka(
+        AuthProperties authProperties,
+        CorsProperties corsProperties,
+        PasswordEncoder passwordEncoder) {
+      this.authProperties = authProperties;
+      this.corsProperties = corsProperties;
+      this.passwordEncoder = passwordEncoder;
     }
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
-      http
-          .authorizeRequests()
-          .antMatchers(HttpMethod.OPTIONS).permitAll()
+    public void configure(WebSecurity web) {
+      web
+          .ignoring()
+          .antMatchers(HttpMethod.OPTIONS)
           .antMatchers("/eureka/css/**", "/eureka/js/**", "/eureka/fonts/**",
-              "/eureka/images/**").permitAll()
-          .requestMatchers(EndpointRequest.to(HealthEndpoint.class)).permitAll()
-          .requestMatchers(EndpointRequest.to(InfoEndpoint.class)).permitAll()
-          .requestMatchers(new AndRequestMatcher(
-              EndpointRequest.toAnyEndpoint(),
-              new AntPathRequestMatcher("/**", HttpMethod.GET.name())))
-          .access(properties.getActuator().buildAccessExpression(properties::ensureRolePrefix))
-          .requestMatchers(EndpointRequest.toAnyEndpoint())
-          .access(properties.getActuator().buildAdminAccessExpression(properties::ensureRolePrefix))
-          .antMatchers("/eureka/**")
-          .access(properties.getEureka().buildAccessExpression(properties::ensureRolePrefix))
-          .anyRequest()
-          .access(properties.getApplication().buildAccessExpression(
-              false, true, false, true,
-              properties::ensureRolePrefix,
-              AuthorityConstants.ADMIN_ROLE_NAME))
-          .and()
-          .userDetailsService(userDetailsService())
-          .csrf().disable()
-          .formLogin().disable()
-          .httpBasic().realmName("eureka");
-    }
-
-    @Bean
-    @Override
-    public UserDetailsService userDetailsService() {
-      return new InMemoryUserDetailsManager(properties.getEureka().buildBasicAuthUserDetails(
-          properties.buildBasicAuthUserDetails()));
-    }
-  }
-
-  /**
-   * The eureka authentication.
-   */
-  @ConditionalOnProperty(
-      prefix = "bremersee.security.authentication",
-      name = "enable-jwt-support",
-      havingValue = "true")
-  @Order(51)
-  @Configuration
-  @EnableConfigurationProperties(AuthenticationProperties.class)
-  static class EurekaAuthentication extends WebSecurityConfigurerAdapter {
-
-    private AuthenticationProperties properties;
-
-    /**
-     * Instantiates a new eureka authentication.
-     *
-     * @param properties the properties
-     */
-    public EurekaAuthentication(AuthenticationProperties properties) {
-      this.properties = properties;
+              "/eureka/images/**");
     }
 
     @Override
@@ -137,13 +103,15 @@ public class SecurityConfiguration {
       http
           .requestMatcher(new AntPathRequestMatcher("/eureka/**"))
           .authorizeRequests()
-          .antMatchers(HttpMethod.OPTIONS).permitAll()
-          .antMatchers("/eureka/css/**", "/eureka/js/**", "/eureka/fonts/**",
-              "/eureka/images/**").permitAll()
           .anyRequest()
-          .access(properties.getEureka().buildAccessExpression(properties::ensureRolePrefix))
+          .access(
+              authProperties.getEureka().buildAccessExpression(authProperties::ensureRolePrefix))
           .and()
-          .userDetailsService(userDetailsService())
+          .cors(customizer -> {
+            if (!corsProperties.isEnable()) {
+              customizer.disable();
+            }
+          })
           .csrf().disable()
           .formLogin().disable()
           .httpBasic().realmName("eureka");
@@ -151,72 +119,91 @@ public class SecurityConfiguration {
 
     @Bean
     @Override
-    public UserDetailsService userDetailsService() {
-      return new InMemoryUserDetailsManager(properties.getEureka().buildBasicAuthUserDetails());
+    public UserDetailsService userDetailsServiceBean() {
+      UserDetails[] other = authProperties.buildBasicAuthUserDetails(passwordEncoder);
+      UserDetails[] all = authProperties.getEureka()
+          .buildBasicAuthUserDetails(passwordEncoder, other);
+      return new InMemoryUserDetailsManager(all);
     }
+
   }
 
   /**
-   * The password flow authentication.
+   * The app and actuator security configuration.
    */
-  @ConditionalOnProperty(
-      prefix = "bremersee.security.authentication",
-      name = "enable-jwt-support",
-      havingValue = "true")
-  @Order(52)
   @Configuration
-  @EnableConfigurationProperties(AuthenticationProperties.class)
-  static class PasswordFlowAuthentication extends WebSecurityConfigurerAdapter {
+  @EnableConfigurationProperties({
+      AuthProperties.class,
+      ActuatorAuthProperties.class
+  })
+  @Order(50)
+  static class AppAndActuator extends WebSecurityConfigurerAdapter {
 
-    private final AuthenticationProperties properties;
+    private final AuthProperties authProperties;
 
-    private final PasswordFlowAuthenticationManager passwordFlowAuthenticationManager;
+    private final ActuatorAuthProperties actuatorAuthProperties;
+
+    private final PasswordFlowAuthenticationManager authenticationManager;
 
     /**
-     * Instantiates a new password flow authentication.
+     * Instantiates a new app and actuator security configuration.
      *
-     * @param properties the properties
-     * @param passwordFlowAuthenticationManager the password flow authentication manager
+     * @param authProperties the auth properties
+     * @param actuatorAuthProperties the actuator auth properties
+     * @param authenticationManagerProvider the authentication manager provider
      */
-    public PasswordFlowAuthentication(
-        AuthenticationProperties properties,
-        ObjectProvider<PasswordFlowAuthenticationManager> passwordFlowAuthenticationManager) {
-      this.properties = properties;
-      this.passwordFlowAuthenticationManager = passwordFlowAuthenticationManager.getIfAvailable();
-      Assert.notNull(
-          this.passwordFlowAuthenticationManager,
-          "Password flow authentication manager must be present.");
+    public AppAndActuator(
+        AuthProperties authProperties,
+        ActuatorAuthProperties actuatorAuthProperties,
+        ObjectProvider<PasswordFlowAuthenticationManager> authenticationManagerProvider) {
+      this.authProperties = authProperties;
+      this.actuatorAuthProperties = actuatorAuthProperties;
+      this.authenticationManager = authenticationManagerProvider.getIfAvailable();
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+
+      List<String> roles = new ArrayList<>(authProperties.getRoleDefinitions()
+          .getOrDefault("admin", Collections.emptyList()));
+      if (roles.isEmpty()) {
+        roles.add(AuthorityConstants.ADMIN_ROLE_NAME);
+      }
+      PathMatcherProperties anyRequestMatcher = new PathMatcherProperties();
+      anyRequestMatcher.setRoles(roles);
+
+      if (authenticationManager != null) {
+        http.authenticationProvider(authenticationManager);
+      }
+
       http
           .requestMatcher(new NegatedRequestMatcher(new AntPathRequestMatcher("/eureka/**")))
           .authorizeRequests()
-          .antMatchers(HttpMethod.OPTIONS).permitAll()
           .requestMatchers(EndpointRequest.to(HealthEndpoint.class)).permitAll()
           .requestMatchers(EndpointRequest.to(InfoEndpoint.class)).permitAll()
           .requestMatchers(new AndRequestMatcher(
               EndpointRequest.toAnyEndpoint(),
               new AntPathRequestMatcher("/**", HttpMethod.GET.name())))
-          .access(properties.getActuator().buildAccessExpression(properties::ensureRolePrefix))
+          .access(actuatorAuthProperties.buildAccessExpression())
           .requestMatchers(EndpointRequest.toAnyEndpoint())
-          .access(properties.getActuator().buildAdminAccessExpression(properties::ensureRolePrefix))
+          .access(actuatorAuthProperties.buildAdminAccessExpression())
           .anyRequest()
-          .access(properties.getApplication().buildAccessExpression(
-              false, true, false, true,
-              properties::ensureRolePrefix,
-              AuthorityConstants.ADMIN_ROLE_NAME))
+          .access(anyRequestMatcher.accessExpression(authProperties::ensureRolePrefix))
           .and()
           .sessionManagement()
           .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
           .and()
-          .authenticationProvider(passwordFlowAuthenticationManager)
+          .cors(customizer -> {
+            if (!actuatorAuthProperties.isEnableCors()) {
+              customizer.disable();
+            }
+          })
           .csrf().disable()
           .formLogin().disable()
           .httpBasic()
-          .realmName("actuator");
+          .realmName("eureka");
     }
+
   }
 
 }
