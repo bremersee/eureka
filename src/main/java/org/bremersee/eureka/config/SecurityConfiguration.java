@@ -19,6 +19,7 @@ package org.bremersee.eureka.config;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.bremersee.actuator.security.authentication.ActuatorAuthProperties;
 import org.bremersee.security.authentication.AuthProperties;
 import org.bremersee.security.authentication.AuthProperties.PathMatcherProperties;
@@ -54,6 +55,7 @@ import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
  */
 @Configuration
 @EnableWebSecurity
+@Slf4j
 public class SecurityConfiguration {
 
   /**
@@ -100,13 +102,16 @@ public class SecurityConfiguration {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+      String accessExpr = authProperties.getEureka()
+          .buildAccessExpression(authProperties::ensureRolePrefix);
+      log.info("Protecting '/eureka' with access expression: {}", accessExpr);
       http
           .requestMatcher(new AntPathRequestMatcher("/eureka/**"))
           .authorizeRequests()
           .anyRequest()
-          .access(
-              authProperties.getEureka().buildAccessExpression(authProperties::ensureRolePrefix))
+          .access(accessExpr)
           .and()
+          .userDetailsService(userDetailsServiceBean())
           .cors(customizer -> {
             if (!corsProperties.isEnable()) {
               customizer.disable();

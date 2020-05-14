@@ -28,13 +28,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
 /**
- * The application tests.
+ * The in-memory application tests.
  *
  * @author Christian Bremer
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles({"in-memory"})
-public class ApplicationTests {
+public class InMemoryApplicationTests {
 
   private static final String eurekaUser = "eureka";
 
