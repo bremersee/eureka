@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -12,7 +12,7 @@
   </parent>
 
   <artifactId>eureka</artifactId>
-  <version>1.2.1</version>
+  <version>1.2.2</version>
   <packaging>jar</packaging>
 
   <name>eureka</name>
@@ -24,7 +24,7 @@
 
     <start-class>org.bremersee.eureka.Application</start-class>
 
-    <common-base.version>2.0.1</common-base.version>
+    <common-base.version>2.1.0</common-base.version>
   </properties>
 
   <scm>
@@ -64,6 +64,20 @@
     </dependency>
     <dependency>
       <groupId>org.bremersee</groupId>
+      <artifactId>common-base-actuator-starter</artifactId>
+      <version>${common-base.version}</version>
+    </dependency>
+    <!--
+      JMX-Bean Management for Spring Boot Admin Server:
+      1) Only for servlet based applications
+      2) Set spring.jmx.enabled=true
+    -->
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.bremersee</groupId>
       <artifactId>common-base-security-starter</artifactId>
       <version>${common-base.version}</version>
     </dependency>
@@ -91,16 +105,6 @@
       <artifactId>spring-retry</artifactId>
     </dependency>
 
-    <!-- Actuator -->
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-actuator</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.micrometer</groupId>
-      <artifactId>micrometer-registry-prometheus</artifactId>
-    </dependency>
-
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-configuration-processor</artifactId>
@@ -113,19 +117,9 @@
     </dependency>
 
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
-      <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.junit.vintage</groupId>
-          <artifactId>junit-vintage-engine</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-test</artifactId>
+      <groupId>org.bremersee</groupId>
+      <artifactId>common-base-test</artifactId>
+      <version>${common-base.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
