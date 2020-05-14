@@ -25,7 +25,7 @@ under the License.
     <language>en-us</language>
     <copyright>&#169;2020 bremersee.org</copyright>
     <item>
-      <title>File: 3,
+      <title>File: 4,
              Errors: 0,
              Warnings: 0,
              Infos: 0
@@ -60,7 +60,7 @@ under the License.
               </tr>
                           <tr>
                 <td>
-                  <a href="https://github.com/bremersee/common-parent/common-service-parent/eureka/checkstyle.html#org.bremersee.eureka.BasicAuthTests.java">org/bremersee/eureka/BasicAuthTests.java</a>
+                  <a href="https://github.com/bremersee/common-parent/common-service-parent/eureka/checkstyle.html#org.bremersee.eureka.JwtApplicationTests.java">org/bremersee/eureka/JwtApplicationTests.java</a>
                 </td>
                 <td>
                   0
@@ -75,6 +75,20 @@ under the License.
                           <tr>
                 <td>
                   <a href="https://github.com/bremersee/common-parent/common-service-parent/eureka/checkstyle.html#org.bremersee.eureka.config.SecurityConfiguration.java">org/bremersee/eureka/config/SecurityConfiguration.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/bremersee/common-parent/common-service-parent/eureka/checkstyle.html#org.bremersee.eureka.InMemoryApplicationTests.java">org/bremersee/eureka/InMemoryApplicationTests.java</a>
                 </td>
                 <td>
                   0

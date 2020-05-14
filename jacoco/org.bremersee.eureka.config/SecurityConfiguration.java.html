@@ -16,29 +16,37 @@
 
 package org.bremersee.eureka.config;
 
-import org.bremersee.security.authentication.AuthenticationProperties;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import lombok.extern.slf4j.Slf4j;
+import org.bremersee.actuator.security.authentication.ActuatorAuthProperties;
+import org.bremersee.security.authentication.AuthProperties;
+import org.bremersee.security.authentication.AuthProperties.PathMatcherProperties;
 import org.bremersee.security.authentication.PasswordFlowAuthenticationManager;
 import org.bremersee.security.core.AuthorityConstants;
+import org.bremersee.web.CorsProperties;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.boot.actuate.info.InfoEndpoint;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.util.matcher.AndRequestMatcher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
-import org.springframework.util.Assert;
 
 /**
  * The security configuration.
@@ -47,176 +55,160 @@ import org.springframework.util.Assert;
  */
 @Configuration
 @EnableWebSecurity
-<span class="fc" id="L50">public class SecurityConfiguration {</span>
+<span class="fc" id="L58">@Slf4j</span>
+<span class="fc" id="L59">public class SecurityConfiguration {</span>
 
   /**
-   * The only simple user authentication.
+   * The eureka security configuration.
    */
-  @ConditionalOnProperty(
-      prefix = &quot;bremersee.security.authentication&quot;,
-      name = &quot;enable-jwt-support&quot;,
-      havingValue = &quot;false&quot;, matchIfMissing = true)
-  @Order(51)
   @Configuration
-  @EnableConfigurationProperties(AuthenticationProperties.class)
-  static class OnlySimpleUserAuthentication extends WebSecurityConfigurerAdapter {
+  @EnableConfigurationProperties({
+      AuthProperties.class,
+      CorsProperties.class
+  })
+  @Order(49)
+  static class Eureka extends WebSecurityConfigurerAdapter {
 
-    private AuthenticationProperties properties;
+    private final AuthProperties authProperties;
+
+    private final CorsProperties corsProperties;
+
+    private final PasswordEncoder passwordEncoder;
 
     /**
-     * Instantiates a only simple user authentication.
+     * Instantiates a new eureka security configuration.
      *
-     * @param properties the properties
+     * @param authProperties the auth properties
+     * @param corsProperties the cors properties
+     * @param passwordEncoder the password encoder
      */
-<span class="fc" id="L71">    public OnlySimpleUserAuthentication(AuthenticationProperties properties) {</span>
-<span class="fc" id="L72">      this.properties = properties;</span>
-<span class="fc" id="L73">    }</span>
+    public Eureka(
+        AuthProperties authProperties,
+        CorsProperties corsProperties,
+<span class="fc" id="L88">        PasswordEncoder passwordEncoder) {</span>
+<span class="fc" id="L89">      this.authProperties = authProperties;</span>
+<span class="fc" id="L90">      this.corsProperties = corsProperties;</span>
+<span class="fc" id="L91">      this.passwordEncoder = passwordEncoder;</span>
+<span class="fc" id="L92">    }</span>
+
+    @Override
+    public void configure(WebSecurity web) {
+<span class="fc" id="L96">      web</span>
+<span class="fc" id="L97">          .ignoring()</span>
+<span class="fc" id="L98">          .antMatchers(HttpMethod.OPTIONS)</span>
+<span class="fc" id="L99">          .antMatchers(&quot;/eureka/css/**&quot;, &quot;/eureka/js/**&quot;, &quot;/eureka/fonts/**&quot;,</span>
+              &quot;/eureka/images/**&quot;);
+<span class="fc" id="L101">    }</span>
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-<span class="fc" id="L77">      http</span>
-<span class="fc" id="L78">          .authorizeRequests()</span>
-<span class="fc" id="L79">          .antMatchers(HttpMethod.OPTIONS).permitAll()</span>
-<span class="fc" id="L80">          .antMatchers(&quot;/eureka/css/**&quot;, &quot;/eureka/js/**&quot;, &quot;/eureka/fonts/**&quot;,</span>
-<span class="fc" id="L81">              &quot;/eureka/images/**&quot;).permitAll()</span>
-<span class="fc" id="L82">          .requestMatchers(EndpointRequest.to(HealthEndpoint.class)).permitAll()</span>
-<span class="fc" id="L83">          .requestMatchers(EndpointRequest.to(InfoEndpoint.class)).permitAll()</span>
-<span class="fc" id="L84">          .requestMatchers(new AndRequestMatcher(</span>
-<span class="fc" id="L85">              EndpointRequest.toAnyEndpoint(),</span>
-<span class="fc" id="L86">              new AntPathRequestMatcher(&quot;/**&quot;, HttpMethod.GET.name())))</span>
-<span class="fc" id="L87">          .access(properties.getActuator().buildAccessExpression(properties::ensureRolePrefix))</span>
-<span class="fc" id="L88">          .requestMatchers(EndpointRequest.toAnyEndpoint())</span>
-<span class="fc" id="L89">          .access(properties.getActuator().buildAdminAccessExpression(properties::ensureRolePrefix))</span>
-<span class="fc" id="L90">          .antMatchers(&quot;/eureka/**&quot;)</span>
-<span class="fc" id="L91">          .access(properties.getEureka().buildAccessExpression(properties::ensureRolePrefix))</span>
-<span class="fc" id="L92">          .anyRequest()</span>
-<span class="fc" id="L93">          .access(properties.getApplication().buildAccessExpression(</span>
-              false, true, false, true,
-<span class="fc" id="L95">              properties::ensureRolePrefix,</span>
-              AuthorityConstants.ADMIN_ROLE_NAME))
-<span class="fc" id="L97">          .and()</span>
-<span class="fc" id="L98">          .userDetailsService(userDetailsService())</span>
-<span class="fc" id="L99">          .csrf().disable()</span>
-<span class="fc" id="L100">          .formLogin().disable()</span>
-<span class="fc" id="L101">          .httpBasic().realmName(&quot;eureka&quot;);</span>
-<span class="fc" id="L102">    }</span>
+<span class="fc" id="L105">      String accessExpr = authProperties.getEureka()</span>
+<span class="fc" id="L106">          .buildAccessExpression(authProperties::ensureRolePrefix);</span>
+<span class="fc" id="L107">      log.info(&quot;Protecting '/eureka' with access expression: {}&quot;, accessExpr);</span>
+<span class="fc" id="L108">      http</span>
+<span class="fc" id="L109">          .requestMatcher(new AntPathRequestMatcher(&quot;/eureka/**&quot;))</span>
+<span class="fc" id="L110">          .authorizeRequests()</span>
+<span class="fc" id="L111">          .anyRequest()</span>
+<span class="fc" id="L112">          .access(accessExpr)</span>
+<span class="fc" id="L113">          .and()</span>
+<span class="fc" id="L114">          .userDetailsService(userDetailsServiceBean())</span>
+<span class="fc" id="L115">          .cors(customizer -&gt; {</span>
+<span class="pc bpc" id="L116" title="1 of 2 branches missed.">            if (!corsProperties.isEnable()) {</span>
+<span class="nc" id="L117">              customizer.disable();</span>
+            }
+<span class="fc" id="L119">          })</span>
+<span class="fc" id="L120">          .csrf().disable()</span>
+<span class="fc" id="L121">          .formLogin().disable()</span>
+<span class="fc" id="L122">          .httpBasic().realmName(&quot;eureka&quot;);</span>
+<span class="fc" id="L123">    }</span>
 
     @Bean
     @Override
-    public UserDetailsService userDetailsService() {
-<span class="fc" id="L107">      return new InMemoryUserDetailsManager(properties.getEureka().buildBasicAuthUserDetails(</span>
-<span class="fc" id="L108">          properties.buildBasicAuthUserDetails()));</span>
+    public UserDetailsService userDetailsServiceBean() {
+<span class="fc" id="L128">      UserDetails[] other = authProperties.buildBasicAuthUserDetails(passwordEncoder);</span>
+<span class="fc" id="L129">      UserDetails[] all = authProperties.getEureka()</span>
+<span class="fc" id="L130">          .buildBasicAuthUserDetails(passwordEncoder, other);</span>
+<span class="fc" id="L131">      return new InMemoryUserDetailsManager(all);</span>
     }
+
   }
 
   /**
-   * The eureka authentication.
+   * The app and actuator security configuration.
    */
-  @ConditionalOnProperty(
-      prefix = &quot;bremersee.security.authentication&quot;,
-      name = &quot;enable-jwt-support&quot;,
-      havingValue = &quot;true&quot;)
-  @Order(51)
   @Configuration
-  @EnableConfigurationProperties(AuthenticationProperties.class)
-  static class EurekaAuthentication extends WebSecurityConfigurerAdapter {
+  @EnableConfigurationProperties({
+      AuthProperties.class,
+      ActuatorAuthProperties.class
+  })
+  @Order(50)
+  static class AppAndActuator extends WebSecurityConfigurerAdapter {
 
-    private AuthenticationProperties properties;
+    private final AuthProperties authProperties;
+
+    private final ActuatorAuthProperties actuatorAuthProperties;
+
+    private final PasswordFlowAuthenticationManager authenticationManager;
 
     /**
-     * Instantiates a new eureka authentication.
+     * Instantiates a new app and actuator security configuration.
      *
-     * @param properties the properties
+     * @param authProperties the auth properties
+     * @param actuatorAuthProperties the actuator auth properties
+     * @param authenticationManagerProvider the authentication manager provider
      */
-<span class="nc" id="L131">    public EurekaAuthentication(AuthenticationProperties properties) {</span>
-<span class="nc" id="L132">      this.properties = properties;</span>
-<span class="nc" id="L133">    }</span>
+    public AppAndActuator(
+        AuthProperties authProperties,
+        ActuatorAuthProperties actuatorAuthProperties,
+<span class="fc" id="L163">        ObjectProvider&lt;PasswordFlowAuthenticationManager&gt; authenticationManagerProvider) {</span>
+<span class="fc" id="L164">      this.authProperties = authProperties;</span>
+<span class="fc" id="L165">      this.actuatorAuthProperties = actuatorAuthProperties;</span>
+<span class="fc" id="L166">      this.authenticationManager = authenticationManagerProvider.getIfAvailable();</span>
+<span class="fc" id="L167">    }</span>
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-<span class="nc" id="L137">      http</span>
-<span class="nc" id="L138">          .requestMatcher(new AntPathRequestMatcher(&quot;/eureka/**&quot;))</span>
-<span class="nc" id="L139">          .authorizeRequests()</span>
-<span class="nc" id="L140">          .antMatchers(HttpMethod.OPTIONS).permitAll()</span>
-<span class="nc" id="L141">          .antMatchers(&quot;/eureka/css/**&quot;, &quot;/eureka/js/**&quot;, &quot;/eureka/fonts/**&quot;,</span>
-<span class="nc" id="L142">              &quot;/eureka/images/**&quot;).permitAll()</span>
-<span class="nc" id="L143">          .anyRequest()</span>
-<span class="nc" id="L144">          .access(properties.getEureka().buildAccessExpression(properties::ensureRolePrefix))</span>
-<span class="nc" id="L145">          .and()</span>
-<span class="nc" id="L146">          .userDetailsService(userDetailsService())</span>
-<span class="nc" id="L147">          .csrf().disable()</span>
-<span class="nc" id="L148">          .formLogin().disable()</span>
-<span class="nc" id="L149">          .httpBasic().realmName(&quot;eureka&quot;);</span>
-<span class="nc" id="L150">    }</span>
 
-    @Bean
-    @Override
-    public UserDetailsService userDetailsService() {
-<span class="nc" id="L155">      return new InMemoryUserDetailsManager(properties.getEureka().buildBasicAuthUserDetails());</span>
-    }
-  }
+<span class="fc" id="L172">      List&lt;String&gt; roles = new ArrayList&lt;&gt;(authProperties.getRoleDefinitions()</span>
+<span class="fc" id="L173">          .getOrDefault(&quot;admin&quot;, Collections.emptyList()));</span>
+<span class="pc bpc" id="L174" title="1 of 2 branches missed.">      if (roles.isEmpty()) {</span>
+<span class="nc" id="L175">        roles.add(AuthorityConstants.ADMIN_ROLE_NAME);</span>
+      }
+<span class="fc" id="L177">      PathMatcherProperties anyRequestMatcher = new PathMatcherProperties();</span>
+<span class="fc" id="L178">      anyRequestMatcher.setRoles(roles);</span>
 
-  /**
-   * The password flow authentication.
-   */
-  @ConditionalOnProperty(
-      prefix = &quot;bremersee.security.authentication&quot;,
-      name = &quot;enable-jwt-support&quot;,
-      havingValue = &quot;true&quot;)
-  @Order(52)
-  @Configuration
-  @EnableConfigurationProperties(AuthenticationProperties.class)
-  static class PasswordFlowAuthentication extends WebSecurityConfigurerAdapter {
+<span class="fc bfc" id="L180" title="All 2 branches covered.">      if (authenticationManager != null) {</span>
+<span class="fc" id="L181">        http.authenticationProvider(authenticationManager);</span>
+      }
 
-    private final AuthenticationProperties properties;
+<span class="fc" id="L184">      http</span>
+<span class="fc" id="L185">          .requestMatcher(new NegatedRequestMatcher(new AntPathRequestMatcher(&quot;/eureka/**&quot;)))</span>
+<span class="fc" id="L186">          .authorizeRequests()</span>
+<span class="fc" id="L187">          .requestMatchers(EndpointRequest.to(HealthEndpoint.class)).permitAll()</span>
+<span class="fc" id="L188">          .requestMatchers(EndpointRequest.to(InfoEndpoint.class)).permitAll()</span>
+<span class="fc" id="L189">          .requestMatchers(new AndRequestMatcher(</span>
+<span class="fc" id="L190">              EndpointRequest.toAnyEndpoint(),</span>
+<span class="fc" id="L191">              new AntPathRequestMatcher(&quot;/**&quot;, HttpMethod.GET.name())))</span>
+<span class="fc" id="L192">          .access(actuatorAuthProperties.buildAccessExpression())</span>
+<span class="fc" id="L193">          .requestMatchers(EndpointRequest.toAnyEndpoint())</span>
+<span class="fc" id="L194">          .access(actuatorAuthProperties.buildAdminAccessExpression())</span>
+<span class="fc" id="L195">          .anyRequest()</span>
+<span class="fc" id="L196">          .access(anyRequestMatcher.accessExpression(authProperties::ensureRolePrefix))</span>
+<span class="fc" id="L197">          .and()</span>
+<span class="fc" id="L198">          .sessionManagement()</span>
+<span class="fc" id="L199">          .sessionCreationPolicy(SessionCreationPolicy.STATELESS)</span>
+<span class="fc" id="L200">          .and()</span>
+<span class="fc" id="L201">          .cors(customizer -&gt; {</span>
+<span class="pc bpc" id="L202" title="1 of 2 branches missed.">            if (!actuatorAuthProperties.isEnableCors()) {</span>
+<span class="nc" id="L203">              customizer.disable();</span>
+            }
+<span class="fc" id="L205">          })</span>
+<span class="fc" id="L206">          .csrf().disable()</span>
+<span class="fc" id="L207">          .formLogin().disable()</span>
+<span class="fc" id="L208">          .httpBasic()</span>
+<span class="fc" id="L209">          .realmName(&quot;eureka&quot;);</span>
+<span class="fc" id="L210">    }</span>
 
-    private final PasswordFlowAuthenticationManager passwordFlowAuthenticationManager;
-
-    /**
-     * Instantiates a new password flow authentication.
-     *
-     * @param properties the properties
-     * @param passwordFlowAuthenticationManager the password flow authentication manager
-     */
-    public PasswordFlowAuthentication(
-        AuthenticationProperties properties,
-<span class="nc" id="L183">        ObjectProvider&lt;PasswordFlowAuthenticationManager&gt; passwordFlowAuthenticationManager) {</span>
-<span class="nc" id="L184">      this.properties = properties;</span>
-<span class="nc" id="L185">      this.passwordFlowAuthenticationManager = passwordFlowAuthenticationManager.getIfAvailable();</span>
-<span class="nc" id="L186">      Assert.notNull(</span>
-          this.passwordFlowAuthenticationManager,
-          &quot;Password flow authentication manager must be present.&quot;);
-<span class="nc" id="L189">    }</span>
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-<span class="nc" id="L193">      http</span>
-<span class="nc" id="L194">          .requestMatcher(new NegatedRequestMatcher(new AntPathRequestMatcher(&quot;/eureka/**&quot;)))</span>
-<span class="nc" id="L195">          .authorizeRequests()</span>
-<span class="nc" id="L196">          .antMatchers(HttpMethod.OPTIONS).permitAll()</span>
-<span class="nc" id="L197">          .requestMatchers(EndpointRequest.to(HealthEndpoint.class)).permitAll()</span>
-<span class="nc" id="L198">          .requestMatchers(EndpointRequest.to(InfoEndpoint.class)).permitAll()</span>
-<span class="nc" id="L199">          .requestMatchers(new AndRequestMatcher(</span>
-<span class="nc" id="L200">              EndpointRequest.toAnyEndpoint(),</span>
-<span class="nc" id="L201">              new AntPathRequestMatcher(&quot;/**&quot;, HttpMethod.GET.name())))</span>
-<span class="nc" id="L202">          .access(properties.getActuator().buildAccessExpression(properties::ensureRolePrefix))</span>
-<span class="nc" id="L203">          .requestMatchers(EndpointRequest.toAnyEndpoint())</span>
-<span class="nc" id="L204">          .access(properties.getActuator().buildAdminAccessExpression(properties::ensureRolePrefix))</span>
-<span class="nc" id="L205">          .anyRequest()</span>
-<span class="nc" id="L206">          .access(properties.getApplication().buildAccessExpression(</span>
-              false, true, false, true,
-<span class="nc" id="L208">              properties::ensureRolePrefix,</span>
-              AuthorityConstants.ADMIN_ROLE_NAME))
-<span class="nc" id="L210">          .and()</span>
-<span class="nc" id="L211">          .sessionManagement()</span>
-<span class="nc" id="L212">          .sessionCreationPolicy(SessionCreationPolicy.STATELESS)</span>
-<span class="nc" id="L213">          .and()</span>
-<span class="nc" id="L214">          .authenticationProvider(passwordFlowAuthenticationManager)</span>
-<span class="nc" id="L215">          .csrf().disable()</span>
-<span class="nc" id="L216">          .formLogin().disable()</span>
-<span class="nc" id="L217">          .httpBasic()</span>
-<span class="nc" id="L218">          .realmName(&quot;actuator&quot;);</span>
-<span class="nc" id="L219">    }</span>
   }
 
 }

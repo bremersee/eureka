@@ -1,6 +1,5 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-eureka,org.bremersee.eureka.config,SecurityConfiguration.PasswordFlowAuthentication,158,0,0,0,30,0,2,0,2,0
-eureka,org.bremersee.eureka.config,SecurityConfiguration.EurekaAuthentication,77,0,0,0,18,0,3,0,3,0
-eureka,org.bremersee.eureka.config,SecurityConfiguration,0,3,0,0,0,1,0,1,0,1
-eureka,org.bremersee.eureka.config,SecurityConfiguration.OnlySimpleUserAuthentication,0,187,0,0,0,29,0,3,0,3
+eureka,org.bremersee.eureka.config,SecurityConfiguration.AppAndActuator,7,161,2,4,2,37,2,4,0,3
+eureka,org.bremersee.eureka.config,SecurityConfiguration.Eureka,3,107,1,1,1,31,1,5,0,5
+eureka,org.bremersee.eureka.config,SecurityConfiguration,0,7,0,0,0,2,0,2,0,2
 eureka,org.bremersee.eureka,Application,5,3,0,0,2,1,1,1,1,1
