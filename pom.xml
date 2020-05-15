@@ -12,7 +12,7 @@
   </parent>
 
   <artifactId>eureka</artifactId>
-  <version>1.2.2</version>
+  <version>1.2.3</version>
   <packaging>jar</packaging>
 
   <name>eureka</name>
@@ -24,7 +24,7 @@
 
     <start-class>org.bremersee.eureka.Application</start-class>
 
-    <common-base.version>2.1.0</common-base.version>
+    <common-base.version>2.1.2</common-base.version>
   </properties>
 
   <scm>
