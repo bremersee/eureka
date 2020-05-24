@@ -17,6 +17,7 @@
 package org.bremersee.eureka.config;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -53,8 +54,8 @@ import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
  *
  * @author Christian Bremer
  */
-@Configuration
 @EnableWebSecurity
+@Configuration
 @Slf4j
 public class SecurityConfiguration {
 
@@ -66,7 +67,7 @@ public class SecurityConfiguration {
       AuthProperties.class,
       CorsProperties.class
   })
-  @Order(49)
+  @Order(51)
   static class Eureka extends WebSecurityConfigurerAdapter {
 
     private final AuthProperties authProperties;
@@ -93,11 +94,17 @@ public class SecurityConfiguration {
 
     @Override
     public void configure(WebSecurity web) {
+      final String[] ignored = {
+          "/eureka/css/**",
+          "/eureka/js/**",
+          "/eureka/fonts/**",
+          "/eureka/images/**"
+      };
+      log.info("Ignoring ant patterns: {}", Arrays.toString(ignored));
       web
           .ignoring()
           .antMatchers(HttpMethod.OPTIONS)
-          .antMatchers("/eureka/css/**", "/eureka/js/**", "/eureka/fonts/**",
-              "/eureka/images/**");
+          .antMatchers(ignored);
     }
 
     @Override
@@ -130,7 +137,6 @@ public class SecurityConfiguration {
           .buildBasicAuthUserDetails(passwordEncoder, other);
       return new InMemoryUserDetailsManager(all);
     }
-
   }
 
   /**
@@ -141,7 +147,7 @@ public class SecurityConfiguration {
       AuthProperties.class,
       ActuatorAuthProperties.class
   })
-  @Order(50)
+  @Order(52)
   static class AppAndActuator extends WebSecurityConfigurerAdapter {
 
     private final AuthProperties authProperties;
@@ -178,7 +184,10 @@ public class SecurityConfiguration {
       anyRequestMatcher.setRoles(roles);
 
       if (authenticationManager != null) {
+        log.info("Protecting all other requests with password flow ...");
         http.authenticationProvider(authenticationManager);
+      } else {
+        log.info("Protecting all other requests ...");
       }
 
       http
@@ -208,7 +217,6 @@ public class SecurityConfiguration {
           .httpBasic()
           .realmName("eureka");
     }
-
   }
 
 }

@@ -22,15 +22,18 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.bremersee.security.authentication.PasswordFlowAuthenticationManager;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -72,6 +75,18 @@ public class JwtApplicationTests {
   MockMvc mvc;
 
   /**
+   * The Jwt decoder provider.
+   */
+  @Autowired
+  ObjectProvider<JwtDecoder> jwtDecoderProvider;
+
+  /**
+   * The Authentication manager provider.
+   */
+  @Autowired
+  ObjectProvider<PasswordFlowAuthenticationManager> authenticationManagerProvider;
+
+  /**
    * Setup mock mvc.
    */
   @BeforeAll
@@ -83,7 +98,25 @@ public class JwtApplicationTests {
   }
 
   /**
+   * Jwt decoder is present.
+   */
+  @Test
+  void jwtDecoderPresent() {
+    assertNotNull(jwtDecoderProvider.getIfAvailable());
+  }
+
+  /**
+   * Authentication manager is present.
+   */
+  @Test
+  void authenticationManagerPresent() {
+    assertNotNull(authenticationManagerProvider.getIfAvailable());
+  }
+
+  /**
    * Fetch web.
+   *
+   * @throws Exception the exception
    */
   @Test
   @WithMockUser(username = "admin", password = "admin", authorities = {"ROLE_ADMIN"})
@@ -94,6 +127,8 @@ public class JwtApplicationTests {
 
   /**
    * Fetch web.
+   *
+   * @throws Exception the exception
    */
   @Test
   @WithMockUser(username = "user", password = "user", authorities = {"ROLE_USER"})
