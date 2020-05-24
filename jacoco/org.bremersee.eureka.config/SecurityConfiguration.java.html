@@ -17,6 +17,7 @@
 package org.bremersee.eureka.config;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -53,10 +54,10 @@ import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
  *
  * @author Christian Bremer
  */
-@Configuration
 @EnableWebSecurity
-<span class="fc" id="L58">@Slf4j</span>
-<span class="fc" id="L59">public class SecurityConfiguration {</span>
+@Configuration
+<span class="fc" id="L59">@Slf4j</span>
+<span class="fc" id="L60">public class SecurityConfiguration {</span>
 
   /**
    * The eureka security configuration.
@@ -66,7 +67,7 @@ import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
       AuthProperties.class,
       CorsProperties.class
   })
-  @Order(49)
+  @Order(51)
   static class Eureka extends WebSecurityConfigurerAdapter {
 
     private final AuthProperties authProperties;
@@ -85,52 +86,57 @@ import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
     public Eureka(
         AuthProperties authProperties,
         CorsProperties corsProperties,
-<span class="fc" id="L88">        PasswordEncoder passwordEncoder) {</span>
-<span class="fc" id="L89">      this.authProperties = authProperties;</span>
-<span class="fc" id="L90">      this.corsProperties = corsProperties;</span>
-<span class="fc" id="L91">      this.passwordEncoder = passwordEncoder;</span>
-<span class="fc" id="L92">    }</span>
+<span class="fc" id="L89">        PasswordEncoder passwordEncoder) {</span>
+<span class="fc" id="L90">      this.authProperties = authProperties;</span>
+<span class="fc" id="L91">      this.corsProperties = corsProperties;</span>
+<span class="fc" id="L92">      this.passwordEncoder = passwordEncoder;</span>
+<span class="fc" id="L93">    }</span>
 
     @Override
     public void configure(WebSecurity web) {
-<span class="fc" id="L96">      web</span>
-<span class="fc" id="L97">          .ignoring()</span>
-<span class="fc" id="L98">          .antMatchers(HttpMethod.OPTIONS)</span>
-<span class="fc" id="L99">          .antMatchers(&quot;/eureka/css/**&quot;, &quot;/eureka/js/**&quot;, &quot;/eureka/fonts/**&quot;,</span>
-              &quot;/eureka/images/**&quot;);
-<span class="fc" id="L101">    }</span>
+<span class="fc" id="L97">      final String[] ignored = {</span>
+          &quot;/eureka/css/**&quot;,
+          &quot;/eureka/js/**&quot;,
+          &quot;/eureka/fonts/**&quot;,
+          &quot;/eureka/images/**&quot;
+      };
+<span class="fc" id="L103">      log.info(&quot;Ignoring ant patterns: {}&quot;, Arrays.toString(ignored));</span>
+<span class="fc" id="L104">      web</span>
+<span class="fc" id="L105">          .ignoring()</span>
+<span class="fc" id="L106">          .antMatchers(HttpMethod.OPTIONS)</span>
+<span class="fc" id="L107">          .antMatchers(ignored);</span>
+<span class="fc" id="L108">    }</span>
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-<span class="fc" id="L105">      String accessExpr = authProperties.getEureka()</span>
-<span class="fc" id="L106">          .buildAccessExpression(authProperties::ensureRolePrefix);</span>
-<span class="fc" id="L107">      log.info(&quot;Protecting '/eureka' with access expression: {}&quot;, accessExpr);</span>
-<span class="fc" id="L108">      http</span>
-<span class="fc" id="L109">          .requestMatcher(new AntPathRequestMatcher(&quot;/eureka/**&quot;))</span>
-<span class="fc" id="L110">          .authorizeRequests()</span>
-<span class="fc" id="L111">          .anyRequest()</span>
-<span class="fc" id="L112">          .access(accessExpr)</span>
-<span class="fc" id="L113">          .and()</span>
-<span class="fc" id="L114">          .userDetailsService(userDetailsServiceBean())</span>
-<span class="fc" id="L115">          .cors(customizer -&gt; {</span>
-<span class="pc bpc" id="L116" title="1 of 2 branches missed.">            if (!corsProperties.isEnable()) {</span>
-<span class="nc" id="L117">              customizer.disable();</span>
+<span class="fc" id="L112">      String accessExpr = authProperties.getEureka()</span>
+<span class="fc" id="L113">          .buildAccessExpression(authProperties::ensureRolePrefix);</span>
+<span class="fc" id="L114">      log.info(&quot;Protecting '/eureka' with access expression: {}&quot;, accessExpr);</span>
+<span class="fc" id="L115">      http</span>
+<span class="fc" id="L116">          .requestMatcher(new AntPathRequestMatcher(&quot;/eureka/**&quot;))</span>
+<span class="fc" id="L117">          .authorizeRequests()</span>
+<span class="fc" id="L118">          .anyRequest()</span>
+<span class="fc" id="L119">          .access(accessExpr)</span>
+<span class="fc" id="L120">          .and()</span>
+<span class="fc" id="L121">          .userDetailsService(userDetailsServiceBean())</span>
+<span class="fc" id="L122">          .cors(customizer -&gt; {</span>
+<span class="pc bpc" id="L123" title="1 of 2 branches missed.">            if (!corsProperties.isEnable()) {</span>
+<span class="nc" id="L124">              customizer.disable();</span>
             }
-<span class="fc" id="L119">          })</span>
-<span class="fc" id="L120">          .csrf().disable()</span>
-<span class="fc" id="L121">          .formLogin().disable()</span>
-<span class="fc" id="L122">          .httpBasic().realmName(&quot;eureka&quot;);</span>
-<span class="fc" id="L123">    }</span>
+<span class="fc" id="L126">          })</span>
+<span class="fc" id="L127">          .csrf().disable()</span>
+<span class="fc" id="L128">          .formLogin().disable()</span>
+<span class="fc" id="L129">          .httpBasic().realmName(&quot;eureka&quot;);</span>
+<span class="fc" id="L130">    }</span>
 
     @Bean
     @Override
     public UserDetailsService userDetailsServiceBean() {
-<span class="fc" id="L128">      UserDetails[] other = authProperties.buildBasicAuthUserDetails(passwordEncoder);</span>
-<span class="fc" id="L129">      UserDetails[] all = authProperties.getEureka()</span>
-<span class="fc" id="L130">          .buildBasicAuthUserDetails(passwordEncoder, other);</span>
-<span class="fc" id="L131">      return new InMemoryUserDetailsManager(all);</span>
+<span class="fc" id="L135">      UserDetails[] other = authProperties.buildBasicAuthUserDetails(passwordEncoder);</span>
+<span class="fc" id="L136">      UserDetails[] all = authProperties.getEureka()</span>
+<span class="fc" id="L137">          .buildBasicAuthUserDetails(passwordEncoder, other);</span>
+<span class="fc" id="L138">      return new InMemoryUserDetailsManager(all);</span>
     }
-
   }
 
   /**
@@ -141,7 +147,7 @@ import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
       AuthProperties.class,
       ActuatorAuthProperties.class
   })
-  @Order(50)
+  @Order(52)
   static class AppAndActuator extends WebSecurityConfigurerAdapter {
 
     private final AuthProperties authProperties;
@@ -160,55 +166,57 @@ import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
     public AppAndActuator(
         AuthProperties authProperties,
         ActuatorAuthProperties actuatorAuthProperties,
-<span class="fc" id="L163">        ObjectProvider&lt;PasswordFlowAuthenticationManager&gt; authenticationManagerProvider) {</span>
-<span class="fc" id="L164">      this.authProperties = authProperties;</span>
-<span class="fc" id="L165">      this.actuatorAuthProperties = actuatorAuthProperties;</span>
-<span class="fc" id="L166">      this.authenticationManager = authenticationManagerProvider.getIfAvailable();</span>
-<span class="fc" id="L167">    }</span>
+<span class="fc" id="L169">        ObjectProvider&lt;PasswordFlowAuthenticationManager&gt; authenticationManagerProvider) {</span>
+<span class="fc" id="L170">      this.authProperties = authProperties;</span>
+<span class="fc" id="L171">      this.actuatorAuthProperties = actuatorAuthProperties;</span>
+<span class="fc" id="L172">      this.authenticationManager = authenticationManagerProvider.getIfAvailable();</span>
+<span class="fc" id="L173">    }</span>
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
-<span class="fc" id="L172">      List&lt;String&gt; roles = new ArrayList&lt;&gt;(authProperties.getRoleDefinitions()</span>
-<span class="fc" id="L173">          .getOrDefault(&quot;admin&quot;, Collections.emptyList()));</span>
-<span class="pc bpc" id="L174" title="1 of 2 branches missed.">      if (roles.isEmpty()) {</span>
-<span class="nc" id="L175">        roles.add(AuthorityConstants.ADMIN_ROLE_NAME);</span>
+<span class="fc" id="L178">      List&lt;String&gt; roles = new ArrayList&lt;&gt;(authProperties.getRoleDefinitions()</span>
+<span class="fc" id="L179">          .getOrDefault(&quot;admin&quot;, Collections.emptyList()));</span>
+<span class="pc bpc" id="L180" title="1 of 2 branches missed.">      if (roles.isEmpty()) {</span>
+<span class="nc" id="L181">        roles.add(AuthorityConstants.ADMIN_ROLE_NAME);</span>
       }
-<span class="fc" id="L177">      PathMatcherProperties anyRequestMatcher = new PathMatcherProperties();</span>
-<span class="fc" id="L178">      anyRequestMatcher.setRoles(roles);</span>
+<span class="fc" id="L183">      PathMatcherProperties anyRequestMatcher = new PathMatcherProperties();</span>
+<span class="fc" id="L184">      anyRequestMatcher.setRoles(roles);</span>
 
-<span class="fc bfc" id="L180" title="All 2 branches covered.">      if (authenticationManager != null) {</span>
-<span class="fc" id="L181">        http.authenticationProvider(authenticationManager);</span>
+<span class="fc bfc" id="L186" title="All 2 branches covered.">      if (authenticationManager != null) {</span>
+<span class="fc" id="L187">        log.info(&quot;Protecting all other requests with password flow ...&quot;);</span>
+<span class="fc" id="L188">        http.authenticationProvider(authenticationManager);</span>
+      } else {
+<span class="fc" id="L190">        log.info(&quot;Protecting all other requests ...&quot;);</span>
       }
 
-<span class="fc" id="L184">      http</span>
-<span class="fc" id="L185">          .requestMatcher(new NegatedRequestMatcher(new AntPathRequestMatcher(&quot;/eureka/**&quot;)))</span>
-<span class="fc" id="L186">          .authorizeRequests()</span>
-<span class="fc" id="L187">          .requestMatchers(EndpointRequest.to(HealthEndpoint.class)).permitAll()</span>
-<span class="fc" id="L188">          .requestMatchers(EndpointRequest.to(InfoEndpoint.class)).permitAll()</span>
-<span class="fc" id="L189">          .requestMatchers(new AndRequestMatcher(</span>
-<span class="fc" id="L190">              EndpointRequest.toAnyEndpoint(),</span>
-<span class="fc" id="L191">              new AntPathRequestMatcher(&quot;/**&quot;, HttpMethod.GET.name())))</span>
-<span class="fc" id="L192">          .access(actuatorAuthProperties.buildAccessExpression())</span>
-<span class="fc" id="L193">          .requestMatchers(EndpointRequest.toAnyEndpoint())</span>
-<span class="fc" id="L194">          .access(actuatorAuthProperties.buildAdminAccessExpression())</span>
-<span class="fc" id="L195">          .anyRequest()</span>
-<span class="fc" id="L196">          .access(anyRequestMatcher.accessExpression(authProperties::ensureRolePrefix))</span>
-<span class="fc" id="L197">          .and()</span>
-<span class="fc" id="L198">          .sessionManagement()</span>
-<span class="fc" id="L199">          .sessionCreationPolicy(SessionCreationPolicy.STATELESS)</span>
-<span class="fc" id="L200">          .and()</span>
-<span class="fc" id="L201">          .cors(customizer -&gt; {</span>
-<span class="pc bpc" id="L202" title="1 of 2 branches missed.">            if (!actuatorAuthProperties.isEnableCors()) {</span>
-<span class="nc" id="L203">              customizer.disable();</span>
+<span class="fc" id="L193">      http</span>
+<span class="fc" id="L194">          .requestMatcher(new NegatedRequestMatcher(new AntPathRequestMatcher(&quot;/eureka/**&quot;)))</span>
+<span class="fc" id="L195">          .authorizeRequests()</span>
+<span class="fc" id="L196">          .requestMatchers(EndpointRequest.to(HealthEndpoint.class)).permitAll()</span>
+<span class="fc" id="L197">          .requestMatchers(EndpointRequest.to(InfoEndpoint.class)).permitAll()</span>
+<span class="fc" id="L198">          .requestMatchers(new AndRequestMatcher(</span>
+<span class="fc" id="L199">              EndpointRequest.toAnyEndpoint(),</span>
+<span class="fc" id="L200">              new AntPathRequestMatcher(&quot;/**&quot;, HttpMethod.GET.name())))</span>
+<span class="fc" id="L201">          .access(actuatorAuthProperties.buildAccessExpression())</span>
+<span class="fc" id="L202">          .requestMatchers(EndpointRequest.toAnyEndpoint())</span>
+<span class="fc" id="L203">          .access(actuatorAuthProperties.buildAdminAccessExpression())</span>
+<span class="fc" id="L204">          .anyRequest()</span>
+<span class="fc" id="L205">          .access(anyRequestMatcher.accessExpression(authProperties::ensureRolePrefix))</span>
+<span class="fc" id="L206">          .and()</span>
+<span class="fc" id="L207">          .sessionManagement()</span>
+<span class="fc" id="L208">          .sessionCreationPolicy(SessionCreationPolicy.STATELESS)</span>
+<span class="fc" id="L209">          .and()</span>
+<span class="fc" id="L210">          .cors(customizer -&gt; {</span>
+<span class="pc bpc" id="L211" title="1 of 2 branches missed.">            if (!actuatorAuthProperties.isEnableCors()) {</span>
+<span class="nc" id="L212">              customizer.disable();</span>
             }
-<span class="fc" id="L205">          })</span>
-<span class="fc" id="L206">          .csrf().disable()</span>
-<span class="fc" id="L207">          .formLogin().disable()</span>
-<span class="fc" id="L208">          .httpBasic()</span>
-<span class="fc" id="L209">          .realmName(&quot;eureka&quot;);</span>
-<span class="fc" id="L210">    }</span>
-
+<span class="fc" id="L214">          })</span>
+<span class="fc" id="L215">          .csrf().disable()</span>
+<span class="fc" id="L216">          .formLogin().disable()</span>
+<span class="fc" id="L217">          .httpBasic()</span>
+<span class="fc" id="L218">          .realmName(&quot;eureka&quot;);</span>
+<span class="fc" id="L219">    }</span>
   }
 
 }
