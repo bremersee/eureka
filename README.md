@@ -1,5 +1,7 @@
 # Bremersee's Spring Cloud Eureka Server
 
+[![codecov](https://codecov.io/gh/bremersee/eureka/branch/develop/graph/badge.svg)](https://codecov.io/gh/bremersee/eureka)
+
 This eureka server is more or less a plain Spring Cloud Eureka Server:
 
 ```xml
