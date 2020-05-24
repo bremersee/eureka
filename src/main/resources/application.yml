@@ -26,6 +26,8 @@ bremersee:
       include-exception-class-name: true
       include-handler: true
       include-path: true
+  redis:
+    embedded: true
 
 spring:
   cloud:
