@@ -11,6 +11,9 @@ pipeline {
     SNAPSHOT_SITE = false
     RELEASE_SITE = true
   }
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '8', artifactNumToKeepStr: '8'))
+  }
   stages {
     stage('Test') {
       agent {
