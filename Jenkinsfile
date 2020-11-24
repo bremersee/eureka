@@ -4,9 +4,9 @@ pipeline {
     DOCKER_IMAGE = 'bremersee/eureka'
     DEV_TAG = 'snapshot'
     PROD_TAG = 'latest'
-    PUSH_SNAPSHOT = false
+    PUSH_SNAPSHOT = true
     PUSH_RELEASE = true
-    DEPLOY_SNAPSHOT = false
+    DEPLOY_SNAPSHOT = true
     DEPLOY_RELEASE = true
     SNAPSHOT_SITE = false
     RELEASE_SITE = true
