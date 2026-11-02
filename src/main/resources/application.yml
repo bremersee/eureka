@@ -73,7 +73,7 @@ bremersee:
 spring:
   config:
     activate:
-      on-profile: ldap
+      on-profile: simple-ldap
 
 bremersee:
   ldaptive:
