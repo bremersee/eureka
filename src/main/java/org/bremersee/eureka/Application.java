@@ -16,7 +16,6 @@
 
 package org.bremersee.eureka;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
@@ -28,7 +27,6 @@ import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
  */
 @SpringBootApplication
 @EnableEurekaServer
-@Slf4j
 public class Application {
 
   /**
@@ -44,9 +42,6 @@ public class Application {
    * @param args the input arguments
    */
   static void main(String[] args) {
-    log.info("===========> config: '{}', '{}'",
-        System.getenv("CONFIG_USER"), System.getenv("CONFIG_PASSWORD"));
-
     SpringApplication.run(Application.class, args);
   }
 }
