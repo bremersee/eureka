@@ -232,7 +232,7 @@ pipeline {
                 rm \$CONTAINER_ID
               sleep 10
             fi
-              docker
+              docker \
                 -H $DATA_DOCKER_HOST \
                 --tlsverify \
                 --tlscert=$DOCKER_CERT \
