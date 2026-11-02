@@ -7,7 +7,7 @@ pipeline {
     NAME='eureka'
     DOCKER_IMAGE = 'bremersee/eureka'
     DOCKER_HOSTS = 'app1 app2'
-    DOCKER_PUSH=true
+    DOCKER_PUSH=false
     DEPLOY_ON_APP_SERVER=true
     DEPLOY_ON_DATA=false
     SITE = false
