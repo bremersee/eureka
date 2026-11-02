@@ -7,9 +7,10 @@ pipeline {
     NAME='eureka'
     DOCKER_IMAGE = 'bremersee/eureka'
     DOCKER_HOSTS = 'app1 app2'
-    DOCKER_PUSH=true
-    DEPLOY_ON_APP_SERVER=true
-    SITE = true
+    DOCKER_PUSH=false
+    DEPLOY_ON_APP_SERVER=false
+    DEPLOY_ON_DATA=true
+    SITE = false
     CLEAN = true
   }
   tools {
@@ -125,11 +126,7 @@ pipeline {
           usernamePassword(
             credentialsId: 'config-server-client',
             usernameVariable: 'CONFIG_USER',
-            passwordVariable: 'CONFIG_SECRET'),
-          string(credentialsId: 'data-docker-host', variable: 'DATA_DOCKER_HOST'),
-          file(credentialsId: 'data-docker-ca', variable: 'DOCKER_CA'),
-          file(credentialsId: 'data-docker-cert', variable: 'DOCKER_CERT'),
-          file(credentialsId: 'data-docker-key', variable: 'DOCKER_KEY'),
+            passwordVariable: 'CONFIG_SECRET')
         ]) {
           sh '''
             #!/bin/bash
@@ -175,6 +172,37 @@ pipeline {
                 -H ssh://root@\$DOCKER_HOST \
                 image prune -a -f
             done
+          '''
+        }
+      }
+    }
+    stage('Deploy On Data') {
+      when {
+        allOf {
+          environment name: 'DEPLOY_ON_DATA', value: 'true'
+          anyOf {
+            branch 'develop'
+            branch 'main'
+          }
+        }
+      }
+      steps {
+        withCredentials([
+          usernamePassword(
+            credentialsId: 'config-server-client',
+            usernameVariable: 'CONFIG_USER',
+            passwordVariable: 'CONFIG_SECRET'),
+          string(credentialsId: 'data-docker-host', variable: 'DATA_DOCKER_HOST'),
+          file(credentialsId: 'data-docker-ca', variable: 'DOCKER_CA'),
+          file(credentialsId: 'data-docker-cert', variable: 'DOCKER_CERT'),
+          file(credentialsId: 'data-docker-key', variable: 'DOCKER_KEY')
+        ]) {
+          sh '''
+            #!/bin/bash
+            sleep 10
+            MVN_VERSION=\$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+            TAG=\$MVN_VERSION
+            LATEST="latest"
             CONTAINER_ID=\$(docker \
               -H $DATA_DOCKER_HOST \
               --tlsverify \
