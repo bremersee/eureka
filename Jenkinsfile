@@ -8,8 +8,8 @@ pipeline {
     DOCKER_IMAGE = 'bremersee/eureka'
     DOCKER_HOSTS = 'app1 app2'
     DOCKER_PUSH=false
-    DEPLOY_ON_APP_SERVER=false
-    DEPLOY_ON_DATA=true
+    DEPLOY_ON_APP_SERVER=true
+    DEPLOY_ON_DATA=false
     SITE = false
     CLEAN = true
   }
@@ -161,9 +161,9 @@ pipeline {
                 --interactive \
                 --name=$NAME \
                 --restart=unless-stopped \
-                -e ACTIVE_PROFILES='\$DOCKER_HOST,ldap' \
-                -e CONFIG_USER='$CONFIG_USER' \
-                -e CONFIG_PASSWORD='$CONFIG_SECRET' \
+                -e ACTIVE_PROFILES=\$DOCKER_HOST,ldap \
+                -e CONFIG_USER=$CONFIG_USER \
+                -e CONFIG_PASSWORD=$CONFIG_SECRET \
                 -e CONFIG_LABEL='develop' \
                 -p 8761:8761 \
                 $DOCKER_IMAGE:\$TAG
@@ -252,8 +252,8 @@ pipeline {
                 --name=$NAME \
                 --restart=unless-stopped \
                 -e ACTIVE_PROFILES='data,ldap' \
-                -e CONFIG_USER='$CONFIG_USER' \
-                -e CONFIG_PASSWORD='$CONFIG_SECRET' \
+                -e CONFIG_USER=$CONFIG_USER \
+                -e CONFIG_PASSWORD=$CONFIG_SECRET \
                 -e CONFIG_LABEL='develop' \
                 -p 8761:8761 \
                 $DOCKER_IMAGE:\$TAG
