@@ -7,12 +7,12 @@
   <parent>
     <groupId>org.bremersee</groupId>
     <artifactId>common-service-parent</artifactId>
-    <version>2.2.0-SNAPSHOT</version>
+    <version>6.1.2</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
   <artifactId>eureka</artifactId>
-  <version>1.2.5-SNAPSHOT</version>
+  <version>1.3.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>eureka</name>
@@ -24,8 +24,34 @@
 
     <start-class>org.bremersee.eureka.Application</start-class>
 
-    <common-base.version>2.3.0-SNAPSHOT</common-base.version>
+    <java.version>25</java.version>
   </properties>
+
+  <developers>
+    <developer>
+      <id>bremersee</id>
+      <name>Christian Bremer</name>
+      <organization>bremersee.org</organization>
+      <organizationUrl>https://bremersee.org</organizationUrl>
+      <email>christian@bremersee.org</email>
+      <timezone>Europe/Berlin</timezone>
+      <roles>
+        <role>Developer</role>
+      </roles>
+    </developer>
+  </developers>
+
+  <organization>
+    <name>bremersee.org</name>
+    <url>https://bremersee.org</url>
+  </organization>
+
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+    </license>
+  </licenses>
 
   <scm>
     <connection>scm:git:ssh://git@github.com:bremersee/eureka.git</connection>
@@ -57,62 +83,58 @@
   </distributionManagement>
 
   <dependencies>
-    <dependency>
-      <groupId>org.bremersee</groupId>
-      <artifactId>common-base-web-starter</artifactId>
-      <version>${common-base.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.bremersee</groupId>
-      <artifactId>common-base-actuator-starter</artifactId>
-      <version>${common-base.version}</version>
-    </dependency>
     <!--
       JMX-Bean Management for Spring Boot Admin Server:
       1) Only for servlet based applications
       2) Set spring.jmx.enabled=true
-    -->
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-core</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.bremersee</groupId>
-      <artifactId>common-base-security-starter</artifactId>
-      <version>${common-base.version}</version>
-    </dependency>
+    -->
 
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.glassfish.jaxb</groupId>
-      <artifactId>jaxb-runtime</artifactId>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-restclient</artifactId>
     </dependency>
-
-    <!-- Jwt cache -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-data-redis</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>it.ozimov</groupId>
-      <artifactId>embedded-redis</artifactId>
+      <artifactId>spring-boot-starter-security</artifactId>
     </dependency>
 
     <!-- Config client -->
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-bootstrap</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-starter-config</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-aop</artifactId>
+      <artifactId>spring-boot-starter-aspectj</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.retry</groupId>
       <artifactId>spring-retry</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.bremersee</groupId>
+      <artifactId>spring-integration-boot-autoconfigure</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.bremersee</groupId>
+      <artifactId>spring-integration-security-ldaptive</artifactId>
     </dependency>
 
     <dependency>
@@ -127,11 +149,49 @@
     </dependency>
 
     <dependency>
-      <groupId>org.bremersee</groupId>
-      <artifactId>common-base-test</artifactId>
-      <version>${common-base.version}</version>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-ldap</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-restclient-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-security-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.unboundid</groupId>
+      <artifactId>unboundid-ldapsdk</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <build>
+    <finalName>eureka</finalName>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <configuration>
+            <skip>true</skip>
+          </configuration>
+        </plugin>
+        <plugin>
+          <artifactId>jdeb</artifactId>
+          <groupId>org.vafer</groupId>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 
 </project>

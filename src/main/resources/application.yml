@@ -1,40 +1,3 @@
-bremersee:
-  auth:
-    resource-server: other
-    eureka:
-      username: ${EUREKA_USERNAME:eureka}
-      password: ${EUREKA_PASSWORD:eureka}
-      role: ${EUREKA_ROLE:ROLE_EUREKA}
-    role-definitions:
-      admin:
-        - "ROLE_ADMIN"
-        - "ROLE_EUREKA_ADMIN"
-  cors:
-    enable: true
-    allow-all: true
-  actuator:
-    auth:
-      enable: other
-      enable-cors: true
-  exception-mapping:
-    api-paths:
-      - /eureka/**
-    default-exception-mapping-config:
-      include-stack-trace: true
-      include-cause: true
-      include-application-name: true
-      include-exception-class-name: true
-      include-handler: true
-      include-path: true
-  redis:
-    embedded: true
-
-spring:
-  cloud:
-    loadbalancer:
-      ribbon:
-        enabled: false
-
 eureka:
   server:
     enable-self-preservation: ${ENABLE_SELF_PRESERVATION:true}
@@ -48,6 +11,15 @@ eureka:
     fetch-registry: ${FETCH_REGISTRY:false}
     service-url:
       defaultZone: ${DEFAULT_ZONE:http://${eureka.instance.hostname}:${server.port}/eureka/}
+
+logging:
+  level:
+    ROOT: info
+    org.springframework: info
+    org.bremersee: info
+    com.netflix.eureka.registry: warn
+    com.netflix.discovery.shared.resolver: warn
+    org.springframework.cloud.configclient: warn
 
 management:
   endpoints:
@@ -70,32 +42,62 @@ server:
     accesslog:
       enabled: false
 
-logging:
-  level:
-    ROOT: info
-    com.netflix.eureka.registry: warn
-    com.netflix.discovery.shared.resolver: warn
-    org.springframework.cloud.configclient: warn
+---
+
+spring:
+  config:
+    activate:
+      on-profile: in-memory
+
+bremersee:
+  authentication:
+    in-memory:
+      enabled: true
+      users:
+        - name: ${EUREKA_USER_NAME:eureka}
+          password: ${EUREKA_USER_PASSWORD:changeit}
+          authorities:
+            - ROLE_EUREKA_SERVER_ADMIN
+        - name: ${ACTUATOR_USER_NAME:actuator}
+          password: ${ACTUATOR_USER_PASSWORD:changeit}
+          authorities:
+            - ROLE_ACTUATOR
+        - name: ${ADMIN_NAME:admin}
+          password: ${ADMIN_PASSWORD:changeit}
+          authorities:
+            - ROLE_EUREKA_SERVER_ADMIN
+            - ROLE_ACTUATOR_ADMIN
 
 ---
 
 spring:
-  profiles: in-memory
+  config:
+    activate:
+      on-profile: ldap
 
 bremersee:
-  auth:
-    in-memory-users:
-      - name: "admin"
-        password: "admin"
-        authorities:
-          - "ROLE_USER"
-          - "ROLE_ADMIN"
-      - name: "actuator"
-        password: "actuator"
-        authorities:
-          - "ROLE_ACTUATOR"
-          - "ROLE_ACTUATOR_ADMIN"
-      - name: "user"
-        password: "user"
-        authorities:
-          - "ROLE_USER"
+  ldaptive:
+    ldap-url: ldaps://dc1.eixe.bremersee.org ldaps://dc2.eixe.bremersee.org
+    ldaptive-template-class: org.bremersee.ldaptive.LdaptiveSambaTemplate
+    immutable: true
+    use-start-tls: false
+    pooled: false
+  authentication:
+    ldaptive:
+      template: active_directory
+      user-base-dn: cn=users,dc=eixe,dc=bremersee,dc=org
+      user-find-one-search-scope: subtree
+      refused-usernames:
+        - "Administrator"
+      role-prefix: "ROLE_"
+      role-case-transformation: to_upper_case
+      role-string-replacements:
+        - regex: "[- ]"
+          replacement: "_"
+        - regex: "_ADMINS"
+          replacement: "_ADMIN"
+      role-mapping:
+        - source: "Domain Admins"
+          target: "ROLE_ADMIN"
+        - source: "samba-admins"
+          target: "ROLE_ADMIN"

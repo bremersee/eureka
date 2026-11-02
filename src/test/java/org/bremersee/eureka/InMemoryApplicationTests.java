@@ -19,11 +19,14 @@ package org.bremersee.eureka;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -32,50 +35,71 @@ import org.springframework.test.context.ActiveProfiles;
  *
  * @author Christian Bremer
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
+    "spring.autoconfigure.exclude=org.springframework.boot.ldap.autoconfigure.LdapAutoConfiguration"
+})
 @ActiveProfiles({"in-memory"})
-public class InMemoryApplicationTests {
+@Slf4j
+class InMemoryApplicationTests {
 
-  private static final String eurekaUser = "eureka";
+  private static final String EUREKA_USER = "eureka";
 
-  private static final String eurekaPass = "eureka";
+  private static final String EUREKA_PASS = "changeit";
 
-  private static final String adminUser = "admin";
+  private static final String ADMIN_USER = "admin";
 
-  private static final String adminPass = "admin";
+  private static final String ADMIN_PASS = "changeit";
 
-  private static final String actuatorUser = "actuator";
+  private static final String ACTUATOR_USER = "actuator";
 
-  private static final String actuatorPass = "actuator";
+  private static final String ACTUATOR_PASS = "changeit";
 
   /**
-   * The rest template.
+   * The rest template builder.
    */
   @Autowired
-  TestRestTemplate restTemplate;
+  RestTemplateBuilder restTemplateBuilder;
 
   /**
-   * Fetch web.
+   * The local server port.
    */
-  @Test
-  void fetchWeb() {
-    ResponseEntity<String> response = restTemplate
-        .withBasicAuth(adminUser, adminPass)
-        .getForEntity("/", String.class);
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertNotNull(response.getBody());
+  @LocalServerPort
+  int port;
+
+  /**
+   * Base url of the local server.
+   *
+   * @return the base url of the local server
+   */
+  String baseUrl() {
+    return "http://localhost:" + port;
   }
 
   /**
    * Fetch web.
    */
   @Test
-  void fetchWebAndExpectForbidden() {
-    ResponseEntity<String> response = restTemplate
-        .withBasicAuth(eurekaUser, eurekaPass)
+  void fetchWeb() {
+    ResponseEntity<String> response = restTemplateBuilder
+        .baseUri(baseUrl())
+        .basicAuthentication(ADMIN_USER, ADMIN_PASS)
+        .build()
         .getForEntity("/", String.class);
-    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
+  }
+
+  /**
+   * Fetch web and expect unauthorized.
+   */
+  @Test
+  void fetchWebAndExpectUnauthorized() {
+    ResponseEntity<String> response = restTemplateBuilder
+        .baseUri(baseUrl())
+        .errorHandler(resp -> resp.getStatusCode().is5xxServerError())
+        .build()
+        .getForEntity("/", String.class);
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
   }
 
   /**
@@ -83,8 +107,11 @@ public class InMemoryApplicationTests {
    */
   @Test
   void fetchApps() {
-    ResponseEntity<String> response = restTemplate
-        .withBasicAuth(eurekaUser, eurekaPass)
+    ResponseEntity<String> response = restTemplateBuilder
+        .baseUri(baseUrl())
+        .basicAuthentication(EUREKA_USER, EUREKA_PASS)
+        .defaultHeader("Accept", MediaType.APPLICATION_JSON_VALUE)
+        .build()
         .getForEntity("/eureka/apps", String.class);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
@@ -95,7 +122,11 @@ public class InMemoryApplicationTests {
    */
   @Test
   void fetchAppsAndExpectUnauthorized() {
-    ResponseEntity<String> response = restTemplate
+    ResponseEntity<String> response = restTemplateBuilder
+        .baseUri(baseUrl())
+        .defaultHeader("Accept", MediaType.APPLICATION_JSON_VALUE)
+        .errorHandler(resp -> resp.getStatusCode().is5xxServerError())
+        .build()
         .getForEntity("/eureka/apps", String.class);
     assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
   }
@@ -105,7 +136,9 @@ public class InMemoryApplicationTests {
    */
   @Test
   void fetchHealth() {
-    ResponseEntity<String> response = restTemplate
+    ResponseEntity<String> response = restTemplateBuilder
+        .baseUri(baseUrl())
+        .build()
         .getForEntity("/actuator/health", String.class);
     assertEquals(HttpStatus.OK, response.getStatusCode());
   }
@@ -115,7 +148,9 @@ public class InMemoryApplicationTests {
    */
   @Test
   void fetchInfo() {
-    ResponseEntity<String> response = restTemplate
+    ResponseEntity<String> response = restTemplateBuilder
+        .baseUri(baseUrl())
+        .build()
         .getForEntity("/actuator/info", String.class);
     assertEquals(HttpStatus.OK, response.getStatusCode());
   }
@@ -125,8 +160,10 @@ public class InMemoryApplicationTests {
    */
   @Test
   void fetchMetrics() {
-    ResponseEntity<String> response = restTemplate
-        .withBasicAuth(actuatorUser, actuatorPass)
+    ResponseEntity<String> response = restTemplateBuilder
+        .baseUri(baseUrl())
+        .basicAuthentication(ACTUATOR_USER, ACTUATOR_PASS)
+        .build()
         .getForEntity("/actuator/metrics", String.class);
     assertEquals(HttpStatus.OK, response.getStatusCode());
   }
@@ -136,7 +173,10 @@ public class InMemoryApplicationTests {
    */
   @Test
   void fetchMetricsAndExpectUnauthorized() {
-    ResponseEntity<String> response = restTemplate
+    ResponseEntity<String> response = restTemplateBuilder
+        .baseUri(baseUrl())
+        .errorHandler(resp -> resp.getStatusCode().is5xxServerError())
+        .build()
         .getForEntity("/actuator/metrics", String.class);
     assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
   }
