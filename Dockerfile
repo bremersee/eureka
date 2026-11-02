@@ -13,7 +13,7 @@ ENV CONFIG_LABEL=develop
 
 RUN mkdir -p /app
 
-COPY target/config-server.jar /app/app.jar
+COPY target/eureka.jar /app/app.jar
 
 WORKDIR /app
 
