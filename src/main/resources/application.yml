@@ -86,7 +86,7 @@ bremersee:
     ldaptive:
       template: active_directory
       user-base-dn: cn=users,dc=eixe,dc=bremersee,dc=org
-      user-find-one-search-scope: subtree
+      user-find-one-search-scope: onelevel
       refused-usernames:
         - "Administrator"
       role-prefix: "ROLE_"

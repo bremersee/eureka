@@ -161,7 +161,9 @@ pipeline {
                 --interactive \
                 --name=$NAME \
                 --restart=unless-stopped \
-                -e ACTIVE_PROFILES=\$DOCKER_HOST,ldap \
+                -e ACTIVE_PROFILES=\$DOCKER_HOST,ldap-with-bind,ldap-auth \
+                -e CONFIG_CLIENT_ENABLED='true' \
+                -e CONFIG_URI='https://config.eixe.bremersee.org' \
                 -e CONFIG_USER=$CONFIG_USER \
                 -e CONFIG_PASSWORD=$CONFIG_SECRET \
                 -e CONFIG_LABEL='develop' \
@@ -251,7 +253,9 @@ pipeline {
                 --interactive \
                 --name=$NAME \
                 --restart=unless-stopped \
-                -e ACTIVE_PROFILES='data,ldap' \
+                -e ACTIVE_PROFILES='data,ldap-with-bind,ldap-auth' \
+                -e CONFIG_CLIENT_ENABLED='true' \
+                -e CONFIG_URI='https://config.eixe.bremersee.org' \
                 -e CONFIG_USER=$CONFIG_USER \
                 -e CONFIG_PASSWORD=$CONFIG_SECRET \
                 -e CONFIG_LABEL='develop' \
