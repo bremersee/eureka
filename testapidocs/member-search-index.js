@@ -1,1 +1,0 @@
-memberSearchIndex = [{"p":"org.bremersee.eureka","c":"InMemoryApplicationTests","l":"InMemoryApplicationTests()","url":"%3Cinit%3E()"},{"p":"org.bremersee.eureka","c":"JwtApplicationTests","l":"JwtApplicationTests()","url":"%3Cinit%3E()"}]

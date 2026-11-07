@@ -1,1 +1,0 @@
-typeSearchIndex = [{"l":"All Classes","url":"allclasses-index.html"},{"p":"org.bremersee.eureka","l":"Application"},{"p":"org.bremersee.eureka.config","l":"SecurityConfiguration"}]
