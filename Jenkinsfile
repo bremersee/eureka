@@ -10,7 +10,7 @@ pipeline {
     DOCKER_PUSH=false
     DEPLOY_ON_APP_SERVER=false
     DEPLOY_ON_DATA=false
-    SITE = false
+    SITE = true
     CLEAN = true
   }
   tools {
