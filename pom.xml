@@ -17,6 +17,7 @@
 
   <name>eureka</name>
   <description>Spring Cloud Eureka</description>
+  <url>https://github.com/bremersee/eureka</url>
 
   <properties>
     <github.repo>eureka</github.repo>

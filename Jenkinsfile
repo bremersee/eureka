@@ -4,12 +4,12 @@ pipeline {
   }
   environment {
     CODECOV_TOKEN = credentials('eureka-codecov-token')
-    NAME='eureka'
+    NAME = 'eureka'
     DOCKER_IMAGE = 'bremersee/eureka'
     DOCKER_HOSTS = 'app1 app2'
-    DOCKER_PUSH=false
-    DEPLOY_ON_APP_SERVER=false
-    DEPLOY_ON_DATA=false
+    DOCKER_PUSH = true
+    DEPLOY_ON_APP_SERVER = true
+    DEPLOY_ON_DATA = true
     SITE = true
     CLEAN = true
   }

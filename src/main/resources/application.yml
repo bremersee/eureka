@@ -1,7 +1,6 @@
 eureka:
   server:
     enable-self-preservation: ${ENABLE_SELF_PRESERVATION:true}
-    eviction-interval-timer-in-ms: ${EVICTION_INTERVAL_TIMER:1000}
   instance:
     hostname: ${HOST_NAME:localhost}
     prefer-ip-address: ${PREFER_IP_ADDRESS:true}

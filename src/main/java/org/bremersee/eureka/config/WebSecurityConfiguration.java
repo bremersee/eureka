@@ -16,7 +16,6 @@
 
 package org.bremersee.eureka.config;
 
-import lombok.extern.slf4j.Slf4j;
 import org.bremersee.spring.boot.autoconfigure.security.authentication.AuthenticationProperties;
 import org.springframework.boot.actuate.info.InfoEndpoint;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -36,14 +35,13 @@ import org.springframework.security.web.util.matcher.AndRequestMatcher;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 /**
- * Spring boot web security configuration.
+ * Web security configuration.
  *
  * @author Christian Bremer
  */
 @Configuration
 @EnableConfigurationProperties({AuthenticationProperties.class, WebSecurityProperties.class})
 @EnableWebSecurity
-@Slf4j
 public class WebSecurityConfiguration {
 
   private final Environment env;

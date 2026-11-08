@@ -17,7 +17,6 @@
 package org.bremersee.eureka.config;
 
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -27,7 +26,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @ConfigurationProperties(prefix = "bremersee.eureka.authentication")
 @Data
-@Slf4j
 public class WebSecurityProperties {
 
   /**
