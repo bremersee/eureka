@@ -17,7 +17,6 @@
 package org.bremersee.eureka.config;
 
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -27,7 +26,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @ConfigurationProperties(prefix = &quot;bremersee.eureka.authentication&quot;)
 @Data
-<span class="fc" id="L30">@Slf4j</span>
 public class WebSecurityProperties {
 
   /**
@@ -38,13 +36,13 @@ public class WebSecurityProperties {
   /**
    * The required role to access the config server.
    */
-<span class="fc" id="L41">  private String eurekaServerAccessRole = ROLE_APPLICATION;</span>
+<span class="fc" id="L39">  private String eurekaServerAccessRole = ROLE_APPLICATION;</span>
 
   /**
    * Instantiates new web security properties.
    */
   public WebSecurityProperties() {
-<span class="fc" id="L47">    super();</span>
-<span class="fc" id="L48">  }</span>
+<span class="fc" id="L45">    super();</span>
+<span class="fc" id="L46">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

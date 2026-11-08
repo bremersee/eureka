@@ -16,7 +16,6 @@
 
 package org.bremersee.eureka.config;
 
-import lombok.extern.slf4j.Slf4j;
 import org.bremersee.spring.boot.autoconfigure.security.authentication.AuthenticationProperties;
 import org.springframework.boot.actuate.info.InfoEndpoint;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -36,14 +35,13 @@ import org.springframework.security.web.util.matcher.AndRequestMatcher;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 /**
- * Spring boot web security configuration.
+ * Web security configuration.
  *
  * @author Christian Bremer
  */
 @Configuration
 @EnableConfigurationProperties({AuthenticationProperties.class, WebSecurityProperties.class})
 @EnableWebSecurity
-<span class="fc" id="L46">@Slf4j</span>
 public class WebSecurityConfiguration {
 
   private final Environment env;
@@ -66,12 +64,12 @@ public class WebSecurityConfiguration {
       Environment env,
       AuthenticationProperties authenticationProperties,
       WebSecurityProperties webSecurityProperties,
-<span class="fc" id="L69">      CorsConfigurationSource corsConfigurationSource) {</span>
-<span class="fc" id="L70">    this.env = env;</span>
-<span class="fc" id="L71">    this.authenticationProperties = authenticationProperties;</span>
-<span class="fc" id="L72">    this.webSecurityProperties = webSecurityProperties;</span>
-<span class="fc" id="L73">    this.corsConfigurationSource = corsConfigurationSource;</span>
-<span class="fc" id="L74">  }</span>
+<span class="fc" id="L67">      CorsConfigurationSource corsConfigurationSource) {</span>
+<span class="fc" id="L68">    this.env = env;</span>
+<span class="fc" id="L69">    this.authenticationProperties = authenticationProperties;</span>
+<span class="fc" id="L70">    this.webSecurityProperties = webSecurityProperties;</span>
+<span class="fc" id="L71">    this.corsConfigurationSource = corsConfigurationSource;</span>
+<span class="fc" id="L72">  }</span>
 
   /**
    * Configures the security filter chain.
@@ -81,47 +79,47 @@ public class WebSecurityConfiguration {
    */
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) {
-<span class="fc" id="L84">    String appName = env.getProperty(&quot;spring.application.name&quot;, &quot;eureka&quot;);</span>
-<span class="fc" id="L85">    String[] actuatorReadRoles = authenticationProperties.getActuator().getReadRoles()</span>
+<span class="fc" id="L82">    String appName = env.getProperty(&quot;spring.application.name&quot;, &quot;eureka&quot;);</span>
+<span class="fc" id="L83">    String[] actuatorReadRoles = authenticationProperties.getActuator().getReadRoles()</span>
+<span class="fc" id="L84">        .toArray(new String[0]);</span>
+<span class="fc" id="L85">    String[] actuatorWriteRoles = authenticationProperties.getActuator().getWriteRoles()</span>
 <span class="fc" id="L86">        .toArray(new String[0]);</span>
-<span class="fc" id="L87">    String[] actuatorWriteRoles = authenticationProperties.getActuator().getWriteRoles()</span>
-<span class="fc" id="L88">        .toArray(new String[0]);</span>
-<span class="fc" id="L89">    return http</span>
-<span class="fc" id="L90">        .authorizeHttpRequests(customizer -&gt; customizer</span>
-<span class="fc" id="L91">            .requestMatchers(HttpMethod.OPTIONS, &quot;/**&quot;)</span>
-<span class="fc" id="L92">            .permitAll()</span>
+<span class="fc" id="L87">    return http</span>
+<span class="fc" id="L88">        .authorizeHttpRequests(customizer -&gt; customizer</span>
+<span class="fc" id="L89">            .requestMatchers(HttpMethod.OPTIONS, &quot;/**&quot;)</span>
+<span class="fc" id="L90">            .permitAll()</span>
 
-<span class="fc" id="L94">            .requestMatchers(</span>
-<span class="fc" id="L95">                EndpointRequest.to(InfoEndpoint.class),</span>
-<span class="fc" id="L96">                EndpointRequest.to(HealthEndpoint.class))</span>
-<span class="fc" id="L97">            .permitAll()</span>
+<span class="fc" id="L92">            .requestMatchers(</span>
+<span class="fc" id="L93">                EndpointRequest.to(InfoEndpoint.class),</span>
+<span class="fc" id="L94">                EndpointRequest.to(HealthEndpoint.class))</span>
+<span class="fc" id="L95">            .permitAll()</span>
 
-<span class="fc" id="L99">            .requestMatchers(new AndRequestMatcher(</span>
-<span class="fc" id="L100">                EndpointRequest.toAnyEndpoint(),</span>
-<span class="fc" id="L101">                PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, &quot;/**&quot;)))</span>
-<span class="fc" id="L102">            .hasAnyAuthority(actuatorReadRoles)</span>
+<span class="fc" id="L97">            .requestMatchers(new AndRequestMatcher(</span>
+<span class="fc" id="L98">                EndpointRequest.toAnyEndpoint(),</span>
+<span class="fc" id="L99">                PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, &quot;/**&quot;)))</span>
+<span class="fc" id="L100">            .hasAnyAuthority(actuatorReadRoles)</span>
 
-<span class="fc" id="L104">            .requestMatchers(EndpointRequest.toAnyEndpoint())</span>
-<span class="fc" id="L105">            .hasAnyAuthority(actuatorWriteRoles)</span>
+<span class="fc" id="L102">            .requestMatchers(EndpointRequest.toAnyEndpoint())</span>
+<span class="fc" id="L103">            .hasAnyAuthority(actuatorWriteRoles)</span>
 
-<span class="fc" id="L107">            .anyRequest()</span>
-<span class="fc" id="L108">            .hasAuthority(webSecurityProperties.getEurekaServerAccessRole()))</span>
+<span class="fc" id="L105">            .anyRequest()</span>
+<span class="fc" id="L106">            .hasAuthority(webSecurityProperties.getEurekaServerAccessRole()))</span>
 
-<span class="fc" id="L110">        .csrf(AbstractHttpConfigurer::disable)</span>
+<span class="fc" id="L108">        .csrf(AbstractHttpConfigurer::disable)</span>
 
-<span class="fc" id="L112">        .cors(customizer -&gt; customizer</span>
-<span class="fc" id="L113">            .configurationSource(corsConfigurationSource))</span>
+<span class="fc" id="L110">        .cors(customizer -&gt; customizer</span>
+<span class="fc" id="L111">            .configurationSource(corsConfigurationSource))</span>
 
-<span class="fc" id="L115">        .headers(configurer -&gt; configurer</span>
-<span class="fc" id="L116">            .frameOptions(FrameOptionsConfig::sameOrigin))</span>
+<span class="fc" id="L113">        .headers(configurer -&gt; configurer</span>
+<span class="fc" id="L114">            .frameOptions(FrameOptionsConfig::sameOrigin))</span>
 
-<span class="fc" id="L118">        .sessionManagement(AbstractHttpConfigurer::disable)</span>
+<span class="fc" id="L116">        .sessionManagement(AbstractHttpConfigurer::disable)</span>
 
-<span class="fc" id="L120">        .httpBasic(customizer -&gt; customizer.realmName(appName))</span>
+<span class="fc" id="L118">        .httpBasic(customizer -&gt; customizer.realmName(appName))</span>
 
-<span class="fc" id="L122">        .formLogin(AbstractHttpConfigurer::disable)</span>
+<span class="fc" id="L120">        .formLogin(AbstractHttpConfigurer::disable)</span>
 
-<span class="fc" id="L124">        .build();</span>
+<span class="fc" id="L122">        .build();</span>
   }
 
 }
