@@ -4,6 +4,7 @@ pipeline {
   }
   environment {
     CODECOV_TOKEN = credentials('eureka-codecov-token')
+    BRANCH_NAME = "${GIT_BRANCH.split("/").size() > 1 ? GIT_BRANCH.split("/")[1] : GIT_BRANCH}"
     NAME = 'eureka'
     DOCKER_IMAGE = 'bremersee/eureka'
     DOCKER_HOSTS = 'app1 app2'
@@ -55,8 +56,9 @@ pipeline {
       }
       steps {
         sh '''
-          mvn -B -P build-system,gh-pages-site site site:stage
+          mvn -B -P build-system,gh-pages-site clean site site:stage
           git clone -b gh-pages git@github.com:bremersee/$NAME.git target/gh-pages
+          rm -rf target/*-SNAPSHOT
           cp -rf target/staging/* target/gh-pages
           git -C target/gh-pages add .
           git -C target/gh-pages commit -m "Maven site"
@@ -166,7 +168,7 @@ pipeline {
                 -e CONFIG_URI='https://config.eixe.bremersee.org' \
                 -e CONFIG_USER=$CONFIG_USER \
                 -e CONFIG_PASSWORD=$CONFIG_SECRET \
-                -e CONFIG_LABEL='develop' \
+                -e CONFIG_LABEL=$BRANCH_NAME \
                 -p 8761:8761 \
                 $DOCKER_IMAGE:\$TAG
               sleep 10
@@ -258,7 +260,7 @@ pipeline {
                 -e CONFIG_URI='https://config.eixe.bremersee.org' \
                 -e CONFIG_USER=$CONFIG_USER \
                 -e CONFIG_PASSWORD=$CONFIG_SECRET \
-                -e CONFIG_LABEL='develop' \
+                -e CONFIG_LABEL=$BRANCH_NAME \
                 -p 8761:8761 \
                 $DOCKER_IMAGE:\$TAG
               sleep 10
