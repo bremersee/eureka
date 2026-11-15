@@ -1,6 +1,6 @@
 # Bremersee's Spring Cloud Eureka Server
 
-[![codecov](https://codecov.io/gh/bremersee/eureka/branch/develop/graph/badge.svg)](https://codecov.io/gh/bremersee/eureka)
+[![codecov](https://codecov.io/gh/bremersee/eureka/branch/main/graph/badge.svg)](https://codecov.io/gh/bremersee/eureka)
 
 This eureka server is more or less a plain Spring Cloud Eureka Server:
 
@@ -13,4 +13,4 @@ This eureka server is more or less a plain Spring Cloud Eureka Server:
 
 ## Maven Site
 
-[Maven-Site](https://bremersee.github.io/eureka/1.3.0-SNAPSHOT/index.html)
+[Maven-Site](https://bremersee.github.io/eureka/1.3.0/index.html)
