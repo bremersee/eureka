@@ -9,6 +9,7 @@ spring:
       uri: ${CONFIG_URI:https://configserver.example.org}
       username: ${CONFIG_USER:user}
       password: ${CONFIG_PASSWORD:changeit}
+      label: ${CONFIG_LABEL:develop}
       fail-fast: ${CONFIG_CLIENT_FAIL_FAST:true}
       retry:
         initial-interval: ${CONFIG_RETRY_INIT_INTERVAL:3000}
